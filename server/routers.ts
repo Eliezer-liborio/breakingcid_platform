@@ -140,7 +140,7 @@ export const appRouter = router({
 
 export type AppRouter = typeof appRouter;
 
-// Async scan execution function
+// Async scan execution function with retry logic
 async function executeScanAsync(scanId: number, scanType: string, target: string) {
   const startTime = Date.now();
   
@@ -150,39 +150,53 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
     let result: any;
     const modulesPath = path.join(process.cwd(), 'server', 'modules');
 
+    // Helper function to execute with retry
+    const execWithRetry = async (command: string, timeout: number, maxRetries = 3) => {
+      let lastError;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`[Scan ${scanId}] Attempt ${attempt}/${maxRetries}: ${command}`);
+          const { stdout, stderr } = await execAsync(command, { timeout });
+          if (stderr && stderr.includes('Error')) {
+            console.warn(`[Scan ${scanId}] Warning in stderr:`, stderr);
+          }
+          return stdout;
+        } catch (error: any) {
+          lastError = error;
+          console.error(`[Scan ${scanId}] Attempt ${attempt} failed:`, error.message);
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+          }
+        }
+      }
+      throw lastError;
+    };
+
     if (scanType === "http_smuggling") {
-      const { stdout } = await execAsync(`python3 ${modulesPath}/http_smuggling.py "${target}"`, {
-        timeout: 120000, // 2 minutes timeout
-      });
+      const stdout = await execWithRetry(`python3 ${modulesPath}/http_smuggling.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "ssrf") {
-      const { stdout } = await execAsync(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, {
-        timeout: 120000,
-      });
+      const stdout = await execWithRetry(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "xss") {
-      const { stdout } = await execAsync(`python3 ${modulesPath}/xss_scanner.py "${target}"`, {
-        timeout: 120000,
-      });
+      const stdout = await execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "subdomain_enum") {
-      const { stdout } = await execAsync(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, {
-        timeout: 180000, // 3 minutes for subdomain enumeration
-      });
+      const stdout = await execWithRetry(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, 180000);
       result = JSON.parse(stdout);
     } else if (scanType === "comprehensive") {
-      // Run all scans
+      // Run all scans with retry
       const [smuggling, ssrf, xss, subdomain] = await Promise.all([
-        execAsync(`python3 ${modulesPath}/http_smuggling.py "${target}"`),
-        execAsync(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`),
-        execAsync(`python3 ${modulesPath}/xss_scanner.py "${target}"`),
-        execAsync(`python3 ${modulesPath}/subdomain_enum.py "${target}"`),
+        execWithRetry(`python3 ${modulesPath}/http_smuggling.py "${target}"`, 120000),
+        execWithRetry(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000),
+        execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}"`, 120000),
+        execWithRetry(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, 180000),
       ]);
       
-      const smugglingResult = JSON.parse(smuggling.stdout);
-      const ssrfResult = JSON.parse(ssrf.stdout);
-      const xssResult = JSON.parse(xss.stdout);
-      const subdomainResult = JSON.parse(subdomain.stdout);
+      const smugglingResult = JSON.parse(smuggling);
+      const ssrfResult = JSON.parse(ssrf);
+      const xssResult = JSON.parse(xss);
+      const subdomainResult = JSON.parse(subdomain);
       
       result = {
         success: true,
