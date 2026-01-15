@@ -282,6 +282,14 @@ export default function Home() {
                   </Button>
                 )}
 
+                {/* Worker Status Alert */}
+                <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-500/30 rounded text-xs">
+                  <div className="text-yellow-500 font-bold mb-1">[!] WORKER REQUIRED</div>
+                  <div className="text-gray-400">
+                    Scans are executed by external worker servers. Configure a worker following <code className="text-green-500">worker/README.md</code>
+                  </div>
+                </div>
+
                 {scanData?.scan.status === 'completed' && (
                   <>
                     <Button

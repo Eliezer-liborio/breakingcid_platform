@@ -166,3 +166,10 @@
 - [x] Documentar fluxos de comunicação
 - [x] Documentar formato de dados
 - [x] Criar exemplos de requisições
+
+## Desabilitar Execução Local - Arquitetura Cliente-Servidor
+- [x] Remover execução direta de scripts Python do backend
+- [x] Modificar routers.ts para apenas criar jobs no banco
+- [x] Atualizar frontend para mostrar status "Waiting for worker"
+- [x] Adicionar mensagem sobre configuração de worker
+- [x] Testar criação de jobs sem execução local

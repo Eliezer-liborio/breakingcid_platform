@@ -61,10 +61,14 @@ export const appRouter = router({
           status: "pending",
         });
 
-        // Start scan asynchronously
-        executeScanAsync(scanId, input.scanType, input.target).catch(err => {
-          console.error(`[Scan ${scanId}] Error:`, err);
+        // Log job creation
+        await createScanLog({
+          scanId,
+          timestamp: new Date(),
+          message: "[*] Scan job created. Waiting for worker to pick up..."
         });
+
+        console.log(`[Scan ${scanId}] Job created, waiting for worker`);
 
         return { scanId, status: "pending" };
       }),
@@ -150,6 +154,9 @@ export const appRouter = router({
 export type AppRouter = typeof appRouter;
 
 // Async scan execution function with retry logic
+// DISABLED: Scans are now executed by external worker servers
+// This function is kept for reference but not called
+/*
 async function executeScanAsync(scanId: number, scanType: string, target: string) {
   const startTime = Date.now();
   
@@ -340,3 +347,4 @@ function generateMarkdownReport(target: string, scanType: string, vulnerabilitie
   
   return report;
 }
+*/
