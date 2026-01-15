@@ -201,24 +201,24 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
     };
 
     if (scanType === "http_smuggling") {
-      const { stdout } = await execWithRetry(`python3.10 ${modulesPath}/http_smuggling.py "${target}"`, 120000);
+      const { stdout } = await execWithRetry(`/usr/bin/python3.10 ${modulesPath}/http_smuggling.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "ssrf") {
-      const { stdout } = await execWithRetry(`python3.10 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000);
+      const { stdout } = await execWithRetry(`/usr/bin/python3.10 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "xss") {
-      const { stdout } = await execWithRetry(`python3.10 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000);
+      const { stdout } = await execWithRetry(`/usr/bin/python3.10 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "subdomain_enum") {
-      const { stdout } = await execWithRetry(`python3.10 ${modulesPath}/subdomain_enum.py "${target}"`, 180000);
+      const { stdout } = await execWithRetry(`/usr/bin/python3.10 ${modulesPath}/subdomain_enum.py "${target}"`, 180000);
       result = JSON.parse(stdout);
     } else if (scanType === "comprehensive") {
       // Run all scans with retry
       const results = await Promise.all([
-        execWithRetry(`python3.10 ${modulesPath}/http_smuggling.py "${target}"`, 120000),
-        execWithRetry(`python3.10 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000),
-        execWithRetry(`python3.10 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000),
-        execWithRetry(`python3.10 ${modulesPath}/subdomain_enum.py "${target}"`, 180000),
+        execWithRetry(`/usr/bin/python3.10 ${modulesPath}/http_smuggling.py "${target}"`, 120000),
+        execWithRetry(`/usr/bin/python3.10 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000),
+        execWithRetry(`/usr/bin/python3.10 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000),
+        execWithRetry(`/usr/bin/python3.10 ${modulesPath}/subdomain_enum.py "${target}"`, 180000),
       ]);
       
       const smugglingResult = JSON.parse(results[0].stdout);

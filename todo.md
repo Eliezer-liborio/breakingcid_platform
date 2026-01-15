@@ -111,3 +111,8 @@
 - [x] Atualizar frontend para exibir logs em tempo real
 - [x] Mostrar cada request, payload e resposta no terminal
 - [x] Testar streaming com todos os scanners
+
+## Correção Python 3.10 - Caminho Absoluto
+- [x] Identificar caminho absoluto do Python 3.10 (/usr/bin/python3.10)
+- [x] Modificar backend para usar /usr/bin/python3.10
+- [x] Testar execução dos scanners
