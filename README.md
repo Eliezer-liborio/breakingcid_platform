@@ -1,8 +1,8 @@
-# BreakingCID - Offensive Security Testing Platform
+# BreakingCID - Offensive Security Testing Platform http scan
 
 Uma plataforma web completa para execução e gerenciamento de testes de vulnerabilidades em aplicações, com integração de ferramentas do Kali Linux e visual cyberpunk/hacker moderno.
 
-## 🎯 Funcionalidades
+##  Funcionalidades
 
 ### Módulos de Segurança
 
@@ -29,7 +29,7 @@ Uma plataforma web completa para execução e gerenciamento de testes de vulnera
 - **Responsivo**: Design adaptável para desktop e mobile
 - **Real-time Updates**: Atualização automática de status de scans
 
-## 🚀 Como Usar
+##  Como Usar
 
 ### 1. Acessar a Plataforma
 
@@ -66,7 +66,7 @@ Após a conclusão, você terá acesso a:
 - Use a busca para filtrar por alvo ou tipo
 - Clique em qualquer scan para ver detalhes completos
 
-## 🔒 Controle de Acesso
+##  Controle de Acesso
 
 ### Usuário Regular
 - Criar e executar scans
@@ -78,7 +78,7 @@ Após a conclusão, você terá acesso a:
 - Visualizar scans de todos os usuários
 - Estatísticas globais da plataforma
 
-## 📊 Dashboard
+##  Dashboard
 
 O dashboard principal exibe:
 
@@ -88,7 +88,7 @@ O dashboard principal exibe:
 - **Issues Críticos**: Vulnerabilidades de alta severidade
 - **Scans Recentes**: Últimos 5 scans com status
 
-## 🛡️ Módulos Técnicos
+##  Módulos Técnicos
 
 ### HTTP Request Smuggling
 
@@ -108,7 +108,7 @@ Detecta vulnerabilidades de Server-Side Request Forgery testando:
 - Serviços internos (localhost, 127.0.0.1)
 - Endpoints comuns vulneráveis
 
-## ⚠️ Aviso Legal
+##  Aviso Legal
 
 **Esta plataforma é destinada exclusivamente para testes autorizados.**
 
@@ -117,7 +117,7 @@ Detecta vulnerabilidades de Server-Side Request Forgery testando:
 - O usuário é totalmente responsável pelo uso da plataforma
 - Siga as diretrizes de **responsible disclosure** ao reportar vulnerabilidades
 
-## 🔧 Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 ### Backend
 - **Node.js + Express**: Servidor web
@@ -138,7 +138,7 @@ Detecta vulnerabilidades de Server-Side Request Forgery testando:
 - **JWT**: Session management
 - **Role-based Access Control**: Permissões
 
-## 📖 Metodologia
+##  Metodologia
 
 Os testes seguem padrões da indústria:
 
@@ -147,7 +147,7 @@ Os testes seguem padrões da indústria:
 - **PTES (Penetration Testing Execution Standard)**
 - Pesquisas de James Kettle (PortSwigger)
 
-## 🎨 Design System
+##  Design System
 
 ### Cores Principais
 - **Primary (Cyan)**: #00FFFF - Elementos principais e ações
@@ -165,7 +165,7 @@ Os testes seguem padrões da indústria:
 - Pulse animations
 - Cyber grid background
 
-## 📝 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 breakingcid_platform/
@@ -184,17 +184,17 @@ breakingcid_platform/
 └── shared/                # Tipos compartilhados
 ```
 
-## 🚦 Status do Projeto
+##  Status do Projeto
 
-✅ **Completo e Funcional**
+ **Completo e Funcional**
 
 Todas as funcionalidades principais foram implementadas e testadas:
-- ✅ Autenticação e controle de acesso
-- ✅ Módulos de segurança (HTTP Smuggling, SSRF)
-- ✅ Dashboard interativo
-- ✅ Sistema de scans assíncronos
-- ✅ Geração de relatórios
-- ✅ Interface cyberpunk completa
+-  Autenticação e controle de acesso
+-  Módulos de segurança (HTTP Smuggling, SSRF)
+-  Dashboard interativo
+-  Sistema de scans assíncronos
+-  Geração de relatórios
+-  Interface cyberpunk completa
 
 ---
 
