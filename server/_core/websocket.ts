@@ -19,12 +19,16 @@ export function setupWebSocket(httpServer: HTTPServer) {
     transports: ["websocket", "polling"],
   });
 
-  // Middleware for authentication - allow connection, validate on subscription
+  // Middleware for authentication
   io.use((socket, next) => {
     const userId = socket.handshake.auth.userId;
     const role = socket.handshake.auth.role;
 
-    socket.data.userId = userId || "anonymous";
+    if (!userId) {
+      return next(new Error("Authentication failed: missing userId"));
+    }
+
+    socket.data.userId = userId;
     socket.data.role = role || "user";
     next();
   });

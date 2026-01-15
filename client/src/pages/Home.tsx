@@ -469,20 +469,20 @@ export default function Home() {
 
         {/* Terminal Output */}
         <div className="lg:col-span-2">
-          <Card className="bg-gray-900 border-green-500/30 p-6 h-[calc(100vh-12rem)]">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Card className="bg-gray-900 border-green-500/30 p-4 h-[calc(100vh-12rem)]">
+            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
               <span className="text-green-500">&gt;</span> TERMINAL OUTPUT
             </h2>
             
             {attackEvolution && currentScanId && (
-              <div className="mb-6 pb-6 border-b border-green-500/30">
+              <div className="mb-3 pb-3 border-b border-green-500/30">
                 <AttackEvolutionDisplay evolution={attackEvolution} />
               </div>
             )}
             
             <div 
               ref={terminalRef}
-              className="bg-black border border-green-500/30 rounded p-4 h-[calc(100%-3rem)] overflow-y-auto font-mono text-sm"
+              className="bg-black border border-green-500/30 rounded p-3 h-[calc(100%-5rem)] overflow-y-auto font-mono text-xs"
             >
               {terminalLines.length === 0 ? (
                 <div className="text-gray-600">
