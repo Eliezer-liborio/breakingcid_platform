@@ -148,3 +148,14 @@
 - [x] Documentar dependências necessárias (Kali tools)
 - [x] Criar script de instalação automática (worker/setup.sh)
 - [x] Documentar configuração de API key
+
+## Reorganização - Arquitetura Profissional
+- [x] Criar estrutura de diretórios (modules/, config/, logs/, results/, utils/)
+- [x] Criar arquivos de payloads (smuggling.txt, ssrf_endpoints.txt, xss_payloads.txt)
+- [x] Criar wordlists (subdomains.txt, api_endpoints.txt, ssrf_params.txt)
+- [x] Atualizar módulos Python com payloads externos
+- [x] Criar utils/progress_bar.py
+- [x] Criar utils/banner.py
+- [x] Criar utils/report_generator.py
+- [x] Criar breakingcid.sh script principal
+- [x] Atualizar worker para usar nova estrutura
