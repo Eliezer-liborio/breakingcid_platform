@@ -94,3 +94,10 @@
 - [x] Mostrar cada request/teste no terminal output
 - [x] Adicionar timestamps nos logs verbose
 - [x] Testar modo verbose com todos os scanners
+
+## Bug Crítico - Scanners Não Funcionando
+- [x] Verificar se códigos fornecidos pelo usuário estão sendo usados
+- [x] Testar execução direta dos módulos Python
+- [x] Verificar logs de erro no backend
+- [x] Corrigir problema de execução (mudado para python3.10)
+- [x] Validar todos os scanners funcionando
