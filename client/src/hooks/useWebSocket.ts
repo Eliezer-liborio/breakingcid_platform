@@ -18,8 +18,9 @@ export function useWebSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket using relative URL
-    const socket = io({
+    // Connect to WebSocket using explicit path
+    const socket = io(window.location.origin, {
+      path: '/socket.io/',
       auth: {
         userId: user.id,
         role: user.role,
@@ -27,10 +28,8 @@ export function useWebSocket() {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+      reconnectionDelayMax: 10000,
       reconnectionAttempts: 10,
-      secure: true,
-      rejectUnauthorized: false,
     });
 
     socket.on('connect', () => {
@@ -48,8 +47,12 @@ export function useWebSocket() {
       setLogs((prev) => [...prev, log]);
     });
 
+    socket.on('connect_error', (error: any) => {
+      console.error('[WebSocket] Connection error:', error.message || error);
+    });
+
     socket.on('error', (error) => {
-      console.error('[WebSocket] Error:', error);
+      console.error('[WebSocket] Socket error:', error);
     });
 
     socketRef.current = socket;
