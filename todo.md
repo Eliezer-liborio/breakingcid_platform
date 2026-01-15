@@ -85,3 +85,12 @@
 - [x] Corrigir problema de execução (retry logic implementado)
 - [x] Testar todos os tipos de scan
 - [x] Validar output no terminal
+
+## Modo Verbose - Output Detalhado em Tempo Real
+- [x] Adicionar toggle verbose no control panel
+- [x] Modificar scanners Python para output progressivo (stderr)
+- [x] Implementar captura de stderr no backend
+- [x] Criar streaming de logs em tempo real
+- [x] Mostrar cada request/teste no terminal output
+- [x] Adicionar timestamps nos logs verbose
+- [x] Testar modo verbose com todos os scanners

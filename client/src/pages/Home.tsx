@@ -8,11 +8,14 @@ import { getLoginUrl } from "@/const";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Terminal, Download, Play, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
   const [target, setTarget] = useState("");
   const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "subdomain_enum" | "comprehensive">("xss");
+  const [verbose, setVerbose] = useState(false);
   const [currentScanId, setCurrentScanId] = useState<number | null>(null);
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -220,6 +223,20 @@ export default function Home() {
                     <SelectItem value="comprehensive" className="text-green-500 font-mono">COMPREHENSIVE</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex items-center justify-between py-3 px-4 bg-black/50 rounded-lg border border-green-500/20">
+                <div>
+                  <Label htmlFor="verbose-mode" className="text-xs text-gray-400 cursor-pointer">VERBOSE MODE</Label>
+                  <p className="text-xs text-gray-600 mt-0.5">Show detailed scan output</p>
+                </div>
+                <Switch
+                  id="verbose-mode"
+                  checked={verbose}
+                  onCheckedChange={setVerbose}
+                  disabled={createScan.isPending || (scanData?.scan.status === 'running')}
+                  className="data-[state=checked]:bg-green-600"
+                />
               </div>
 
               <div className="pt-4 space-y-2">

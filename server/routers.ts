@@ -157,10 +157,14 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
         try {
           console.log(`[Scan ${scanId}] Attempt ${attempt}/${maxRetries}: ${command}`);
           const { stdout, stderr } = await execAsync(command, { timeout });
-          if (stderr && stderr.includes('Error')) {
-            console.warn(`[Scan ${scanId}] Warning in stderr:`, stderr);
+          if (stderr) {
+            // Log stderr output (includes verbose logs)
+            console.log(`[Scan ${scanId}] stderr:`, stderr);
+            if (stderr.includes('Error') && !stderr.includes('[VERBOSE]')) {
+              console.warn(`[Scan ${scanId}] Warning in stderr:`, stderr);
+            }
           }
-          return stdout;
+          return { stdout, stderr };
         } catch (error: any) {
           lastError = error;
           console.error(`[Scan ${scanId}] Attempt ${attempt} failed:`, error.message);
@@ -173,30 +177,30 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
     };
 
     if (scanType === "http_smuggling") {
-      const stdout = await execWithRetry(`python3 ${modulesPath}/http_smuggling.py "${target}"`, 120000);
+      const { stdout } = await execWithRetry(`python3 ${modulesPath}/http_smuggling.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "ssrf") {
-      const stdout = await execWithRetry(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000);
+      const { stdout } = await execWithRetry(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "xss") {
-      const stdout = await execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}"`, 120000);
+      const { stdout } = await execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000);
       result = JSON.parse(stdout);
     } else if (scanType === "subdomain_enum") {
-      const stdout = await execWithRetry(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, 180000);
+      const { stdout } = await execWithRetry(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, 180000);
       result = JSON.parse(stdout);
     } else if (scanType === "comprehensive") {
       // Run all scans with retry
-      const [smuggling, ssrf, xss, subdomain] = await Promise.all([
+      const results = await Promise.all([
         execWithRetry(`python3 ${modulesPath}/http_smuggling.py "${target}"`, 120000),
         execWithRetry(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`, 120000),
-        execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}"`, 120000),
+        execWithRetry(`python3 ${modulesPath}/xss_scanner.py "${target}" --verbose`, 120000),
         execWithRetry(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, 180000),
       ]);
       
-      const smugglingResult = JSON.parse(smuggling);
-      const ssrfResult = JSON.parse(ssrf);
-      const xssResult = JSON.parse(xss);
-      const subdomainResult = JSON.parse(subdomain);
+      const smugglingResult = JSON.parse(results[0].stdout);
+      const ssrfResult = JSON.parse(results[1].stdout);
+      const xssResult = JSON.parse(results[2].stdout);
+      const subdomainResult = JSON.parse(results[3].stdout);
       
       result = {
         success: true,

@@ -13,14 +13,20 @@ import warnings
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 class XSSScanner:
-    def __init__(self, target):
+    def __init__(self, target, verbose=False):
         self.target = target
+        self.verbose = verbose
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         })
         self.vulnerabilities = []
+    
+    def log(self, message):
+        """Print verbose logs to stderr"""
+        if self.verbose:
+            print(f"[VERBOSE] {message}", file=sys.stderr, flush=True)
         
     def generate_payloads(self):
         """Generate XSS test payloads"""
@@ -50,25 +56,32 @@ class XSSScanner:
     def test_reflected_xss(self):
         """Test for reflected XSS"""
         print(f"[*] Testing Reflected XSS on {self.target}", file=sys.stderr)
+        self.log(f"Starting Reflected XSS tests with {len([p for p in self.generate_payloads() if p['type'] in ['reflected', 'bypass']])} payloads")
         
         payloads = [p for p in self.generate_payloads() if p['type'] in ['reflected', 'bypass']]
         
         # Parse URL to get parameters
         parsed = urllib.parse.urlparse(self.target)
         base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+        self.log(f"Base URL: {base_url}")
         
         # Test with sample parameters if no params exist
         test_params = ['q', 'search', 'query', 'id', 'page', 'name']
+        self.log(f"Testing parameters: {', '.join(test_params)}")
         
         for param in test_params:
+            self.log(f"Testing parameter: {param}")
             for payload_obj in payloads[:5]:  # Test first 5 payloads per param
                 test_url = f"{base_url}?{param}={urllib.parse.quote(payload_obj['payload'])}"
+                self.log(f"  → Testing payload: {payload_obj['payload'][:50]}...")
                 
                 try:
                     response = self.session.get(test_url, timeout=10, verify=False)
+                    self.log(f"    Response: {response.status_code} ({len(response.text)} bytes)")
                     
                     if payload_obj['payload'] in response.text or \
                        payload_obj['payload'].replace('<', '&lt;').replace('>', '&gt;') in response.text:
+                        self.log(f"    ✓ VULNERABILITY FOUND!")
                         self.vulnerabilities.append({
                             'type': 'Reflected XSS',
                             'severity': payload_obj['severity'],
@@ -199,9 +212,10 @@ def main():
         sys.exit(1)
     
     target = sys.argv[1]
+    verbose = '--verbose' in sys.argv or '-v' in sys.argv
     
     try:
-        scanner = XSSScanner(target)
+        scanner = XSSScanner(target, verbose=verbose)
         result = scanner.scan()
         print(json.dumps(result, indent=2))
         
