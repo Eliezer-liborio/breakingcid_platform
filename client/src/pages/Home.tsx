@@ -1,132 +1,334 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
-import { Shield, Zap, Target, Activity } from "lucide-react";
-import { Link } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { Terminal, Download, Play, Loader2 } from "lucide-react";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
+  const [target, setTarget] = useState("");
+  const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "subdomain_enum" | "comprehensive">("xss");
+  const [currentScanId, setCurrentScanId] = useState<number | null>(null);
+  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  const createScan = trpc.scans.create.useMutation({
+    onSuccess: (data) => {
+      setCurrentScanId(data.scanId);
+      addTerminalLine(`[+] Scan initiated with ID: ${data.scanId}`);
+      addTerminalLine(`[*] Status: ${data.status}`);
+      addTerminalLine(`[*] Waiting for results...`);
+    },
+    onError: (error) => {
+      addTerminalLine(`[!] ERROR: ${error.message}`);
+      toast.error("Scan failed", { description: error.message });
+    },
+  });
+
+  const { data: scanData, refetch } = trpc.scans.get.useQuery(
+    { id: currentScanId! },
+    { 
+      enabled: currentScanId !== null,
+      refetchInterval: (query) => {
+        const data = query.state.data;
+        if (data?.scan.status === 'running' || data?.scan.status === 'pending') {
+          return 2000; // Poll every 2 seconds
+        }
+        return false;
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (scanData) {
+      if (scanData.scan.status === 'completed') {
+        addTerminalLine(`[+] Scan completed successfully!`);
+        addTerminalLine(`[+] Found ${scanData.vulnerabilities.length} vulnerabilities`);
+        
+        const summary = scanData.report?.summary;
+        if (summary) {
+          addTerminalLine(`[*] Critical: ${summary.critical} | High: ${summary.high} | Medium: ${summary.medium} | Low: ${summary.low}`);
+        }
+      } else if (scanData.scan.status === 'failed') {
+        addTerminalLine(`[!] Scan failed`);
+      } else if (scanData.scan.status === 'running') {
+        if (terminalOutput[terminalOutput.length - 1] !== '[*] Scan in progress...') {
+          addTerminalLine(`[*] Scan in progress...`);
+        }
+      }
+    }
+  }, [scanData]);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalOutput]);
+
+  const addTerminalLine = (line: string) => {
+    setTerminalOutput(prev => [...prev, line]);
+  };
+
+  const handleExecute = () => {
+    if (!target) {
+      toast.error("Target URL required");
+      return;
+    }
+
+    try {
+      new URL(target);
+    } catch {
+      toast.error("Invalid URL format");
+      return;
+    }
+
+    setTerminalOutput([]);
+    addTerminalLine(`╔═══════════════════════════════════════════════════════════════╗`);
+    addTerminalLine(`║              BREAKINGCID SECURITY SCANNER v2.0              ║`);
+    addTerminalLine(`╚═══════════════════════════════════════════════════════════════╝`);
+    addTerminalLine(``);
+    addTerminalLine(`[*] Target: ${target}`);
+    addTerminalLine(`[*] Scan Type: ${scanType.toUpperCase().replace('_', ' ')}`);
+    addTerminalLine(`[*] Initializing scanner modules...`);
+    addTerminalLine(``);
+
+    createScan.mutate({ target, scanType });
+  };
+
+  const handleDownloadReport = () => {
+    if (!scanData?.report) {
+      toast.error("No report available");
+      return;
+    }
+
+    const blob = new Blob([scanData.report.content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `breakingcid_scan_${currentScanId}_${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    addTerminalLine(`[+] Report downloaded successfully`);
+    toast.success("Report downloaded");
+  };
+
+  const handleNewScan = () => {
+    setCurrentScanId(null);
+    setTerminalOutput([]);
+    setTarget("");
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Activity className="w-12 h-12 text-primary animate-spin" />
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-green-500 font-mono">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <Card className="max-w-md w-full bg-gray-900 border-green-500/30 p-8">
+          <div className="text-center space-y-6">
+            <div className="font-mono text-green-500 text-sm">
+              <pre className="text-left">
+{`
+ ██████╗ ██████╗ ███████╗ █████╗ ██╗  ██╗██╗███╗   ██╗ ██████╗  ██████╗██╗██████╗ 
+ ██╔══██╗██╔══██╗██╔════╝██╔══██╗██║ ██╔╝██║████╗  ██║██╔════╝ ██╔════╝██║██╔══██╗
+ ██████╔╝██████╔╝█████╗  ███████║█████╔╝ ██║██╔██╗ ██║██║  ███╗██║     ██║██║  ██║
+ ██╔══██╗██╔══██╗██╔══╝  ██╔══██║██╔═██╗ ██║██║╚██╗██║██║   ██║██║     ██║██║  ██║
+ ██████╔╝██║  ██║███████╗██║  ██║██║  ██╗██║██║ ╚████║╚██████╔╝╚██████╗██║██████╔╝
+ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝╚═╝╚═════╝ 
+`}
+              </pre>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-green-500 font-mono">OFFENSIVE SECURITY PLATFORM</h2>
+              <p className="text-gray-400 font-mono text-sm">Authentication Required</p>
+            </div>
+            <Button
+              onClick={() => window.location.href = getLoginUrl()}
+              className="w-full bg-green-600 hover:bg-green-700 text-black font-mono font-bold"
+            >
+              &gt; LOGIN
+            </Button>
+          </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black text-green-500 font-mono p-4">
       {/* Header */}
-      <header className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">BreakingCID</h1>
+            <Terminal className="w-6 h-6" />
+            <h1 className="text-2xl font-bold">BREAKINGCID</h1>
           </div>
-          
-          <nav className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost" className="text-foreground hover:text-primary">
-                    Dashboard
-                  </Button>
-                </Link>
-                <Link href="/scan/new">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    New Scan
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <a href={getLoginUrl()}>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Sign In
-                </Button>
-              </a>
-            )}
-          </nav>
+          <div className="text-sm text-gray-400">
+            USER: {user?.name || user?.email} | ROLE: {user?.role?.toUpperCase()}
+          </div>
         </div>
-      </header>
+        <div className="h-px bg-green-500/30"></div>
+      </div>
 
-      {/* Hero Section */}
-      <main className="container mx-auto px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-6xl font-bold text-foreground leading-tight">
-              Offensive Security
-              <br />
-              <span className="text-primary">Testing Platform</span>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Control Panel */}
+        <div className="lg:col-span-1">
+          <Card className="bg-gray-900 border-green-500/30 p-6">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span className="text-green-500">&gt;</span> CONTROL PANEL
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Execute advanced vulnerability scans with HTTP Request Smuggling and SSRF detection. 
-              Professional-grade security testing powered by cutting-edge research.
-            </p>
-          </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-400 mb-2 block">TARGET URL</label>
+                <Input
+                  type="url"
+                  placeholder="https://target.com"
+                  value={target}
+                  onChange={(e) => setTarget(e.target.value)}
+                  className="bg-black border-green-500/30 text-green-500 font-mono placeholder:text-gray-600"
+                  disabled={createScan.isPending || (scanData?.scan.status === 'running')}
+                />
+              </div>
 
-          <div className="flex gap-4 justify-center">
-            {isAuthenticated ? (
-              <>
-                <Link href="/dashboard">
-                  <Button size="lg" variant="outline" className="text-lg px-8">
-                    <Activity className="w-5 h-5 mr-2" />
-                    Dashboard
+              <div>
+                <label className="text-xs text-gray-400 mb-2 block">SCAN TYPE</label>
+                <Select value={scanType} onValueChange={(value: any) => setScanType(value)} disabled={createScan.isPending || (scanData?.scan.status === 'running')}>
+                  <SelectTrigger className="bg-black border-green-500/30 text-green-500 font-mono">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-green-500/30">
+                    <SelectItem value="http_smuggling" className="text-green-500 font-mono">HTTP SMUGGLING</SelectItem>
+                    <SelectItem value="ssrf" className="text-green-500 font-mono">SSRF DETECTION</SelectItem>
+                    <SelectItem value="xss" className="text-green-500 font-mono">XSS SCANNER</SelectItem>
+                    <SelectItem value="subdomain_enum" className="text-green-500 font-mono">SUBDOMAIN ENUM</SelectItem>
+                    <SelectItem value="comprehensive" className="text-green-500 font-mono">COMPREHENSIVE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="pt-4 space-y-2">
+                {!currentScanId || scanData?.scan.status === 'completed' || scanData?.scan.status === 'failed' ? (
+                  <Button
+                    onClick={handleExecute}
+                    disabled={createScan.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700 text-black font-bold"
+                  >
+                    {createScan.isPending ? (
+                      <><Loader2 className="w-4 h-4 animate-spin mr-2" /> INITIALIZING...</>
+                    ) : (
+                      <><Play className="w-4 h-4 mr-2" /> EXECUTE SCAN</>
+                    )}
                   </Button>
-                </Link>
-                <Link href="/scan/new">
-                  <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8">
-                    <Zap className="w-5 h-5 mr-2" />
-                    Start Scan
+                ) : (
+                  <Button disabled className="w-full bg-gray-700 text-gray-400 font-bold">
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> SCAN IN PROGRESS...
                   </Button>
-                </Link>
-              </>
-            ) : (
-              <a href={getLoginUrl()}>
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8">
-                  <Shield className="w-5 h-5 mr-2" />
-                  Get Started
-                </Button>
-              </a>
+                )}
+
+                {scanData?.scan.status === 'completed' && (
+                  <>
+                    <Button
+                      onClick={handleDownloadReport}
+                      variant="outline"
+                      className="w-full border-green-500/30 text-green-500 hover:bg-green-500/10"
+                    >
+                      <Download className="w-4 h-4 mr-2" /> DOWNLOAD REPORT
+                    </Button>
+                    <Button
+                      onClick={handleNewScan}
+                      variant="outline"
+                      className="w-full border-green-500/30 text-green-500 hover:bg-green-500/10"
+                    >
+                      NEW SCAN
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Stats */}
+            {scanData && (
+              <div className="mt-6 pt-6 border-t border-green-500/30">
+                <h3 className="text-xs text-gray-400 mb-3">SCAN STATISTICS</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Status:</span>
+                    <span className={
+                      scanData.scan.status === 'completed' ? 'text-green-500' :
+                      scanData.scan.status === 'failed' ? 'text-red-500' :
+                      'text-yellow-500'
+                    }>
+                      {scanData.scan.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Vulnerabilities:</span>
+                    <span className="text-green-500">{scanData.vulnerabilities.length}</span>
+                  </div>
+                  {scanData.scan.duration && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Duration:</span>
+                      <span className="text-green-500">{scanData.scan.duration}s</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-          </div>
+          </Card>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mt-20 max-w-5xl mx-auto">
-          <div className="p-6 rounded-lg border border-border bg-card hover:border-primary transition-all">
-            <Target className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-foreground">HTTP Smuggling</h3>
-            <p className="text-muted-foreground">
-              Detect CL.TE, TE.CL, and TE.TE vulnerabilities based on James Kettle's research
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg border border-border bg-card hover:border-secondary transition-all">
-            <Zap className="w-12 h-12 text-secondary mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-foreground">SSRF Detection</h3>
-            <p className="text-muted-foreground">
-              Identify Server-Side Request Forgery with cloud metadata and internal service detection
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg border border-border bg-card hover:border-accent transition-all">
-            <Activity className="w-12 h-12 text-accent mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-foreground">Real-time Reports</h3>
-            <p className="text-muted-foreground">
-              Generate detailed markdown reports with severity ratings and remediation guidance
-            </p>
-          </div>
+        {/* Terminal Output */}
+        <div className="lg:col-span-2">
+          <Card className="bg-gray-900 border-green-500/30 p-6 h-[calc(100vh-12rem)]">
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <span className="text-green-500">&gt;</span> TERMINAL OUTPUT
+            </h2>
+            
+            <div 
+              ref={terminalRef}
+              className="bg-black border border-green-500/30 rounded p-4 h-[calc(100%-3rem)] overflow-y-auto font-mono text-sm"
+            >
+              {terminalOutput.length === 0 ? (
+                <div className="text-gray-600">
+                  <p>&gt; Awaiting command...</p>
+                  <p className="mt-2">&gt; Select scan type, enter target URL, and execute.</p>
+                </div>
+              ) : (
+                terminalOutput.map((line, index) => (
+                  <div key={index} className="mb-1">
+                    {line.startsWith('[+]') && <span className="text-green-500">{line}</span>}
+                    {line.startsWith('[*]') && <span className="text-blue-400">{line}</span>}
+                    {line.startsWith('[!]') && <span className="text-red-500">{line}</span>}
+                    {!line.startsWith('[') && <span className="text-gray-400">{line}</span>}
+                  </div>
+                ))
+              )}
+              
+              {(createScan.isPending || scanData?.scan.status === 'running') && (
+                <div className="mt-2 text-yellow-500 animate-pulse">
+                  &gt; _
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border mt-20 py-8">
-        <div className="container mx-auto px-6 text-center text-muted-foreground">
-          <p>BreakingCID - Professional Offensive Security Testing Platform</p>
-          <p className="text-sm mt-2">For authorized testing only</p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

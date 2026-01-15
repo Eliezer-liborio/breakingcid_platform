@@ -66,3 +66,15 @@
 - [x] Adicionar tipo de scan "subdomain_enum" no frontend
 - [x] Atualizar schema do banco de dados
 - [x] Testar execução de enumeração
+
+## Redesign Frontend - Single Page Terminal Style
+- [x] Remover navegação complexa e múltiplas páginas
+- [x] Criar Single Page Application minimalista
+- [x] Adicionar ASCII art banner estilo hacker
+- [x] Implementar animações de texto tipo terminal
+- [x] Criar componente de execução em tempo real
+- [x] Adicionar output de scan estilo console/terminal
+- [x] Implementar download de relatórios .txt
+- [x] Remover sidebar e menus desnecessários
+- [x] Criar experiência visual red team/exploit style
+- [x] Adicionar animações de loading estilo hacker
