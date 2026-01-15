@@ -66,13 +66,13 @@ export default function NewScan() {
   }
 
   return (
-    <div className="min-h-screen bg-background cyber-grid">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary glow-text" />
-            <h1 className="text-2xl font-bold glow-text text-primary">BreakingCID</h1>
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">BreakingCID</h1>
           </div>
           
           <nav className="flex items-center gap-4">
@@ -93,13 +93,13 @@ export default function NewScan() {
         <div className="max-w-3xl mx-auto space-y-8">
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">
-              <span className="text-primary glow-text">New Security Scan</span>
+              <span className="text-primary">New Security Scan</span>
             </h2>
             <p className="text-muted-foreground">Configure and launch a vulnerability assessment</p>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <Card className="neon-border bg-card/50 backdrop-blur">
+            <Card className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="text-foreground">Scan Configuration</CardTitle>
                 <CardDescription className="text-muted-foreground">
@@ -117,7 +117,7 @@ export default function NewScan() {
                     value={target}
                     onChange={(e) => setTarget(e.target.value)}
                     required
-                    className="bg-input border-border/50 focus:border-primary text-foreground"
+                    className="bg-input border-border text-foreground"
                   />
                   <p className="text-xs text-muted-foreground">
                     Full URL of the target application
@@ -128,7 +128,7 @@ export default function NewScan() {
                 <div className="space-y-3">
                   <Label className="text-foreground">Scan Type *</Label>
                   <RadioGroup value={scanType} onValueChange={(value: any) => setScanType(value)}>
-                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-all">
+                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-primary transition-all">
                       <RadioGroupItem value="http_smuggling" id="http_smuggling" />
                       <Label htmlFor="http_smuggling" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ export default function NewScan() {
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border/50 hover:border-secondary/50 transition-all">
+                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-secondary transition-all">
                       <RadioGroupItem value="ssrf" id="ssrf" />
                       <Label htmlFor="ssrf" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-3">
@@ -154,7 +154,7 @@ export default function NewScan() {
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border/50 hover:border-accent/50 transition-all">
+                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-accent transition-all">
                       <RadioGroupItem value="comprehensive" id="comprehensive" />
                       <Label htmlFor="comprehensive" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-3">
@@ -178,7 +178,7 @@ export default function NewScan() {
                     value={scope}
                     onChange={(e) => setScope(e.target.value)}
                     rows={3}
-                    className="bg-input border-border/50 focus:border-primary text-foreground"
+                    className="bg-input border-border text-foreground"
                   />
                   <p className="text-xs text-muted-foreground">
                     Additional domains or endpoints to include in the scan
@@ -196,14 +196,14 @@ export default function NewScan() {
                 {/* Submit Button */}
                 <div className="flex gap-4">
                   <Link href="/dashboard" className="flex-1">
-                    <Button type="button" variant="outline" className="w-full neon-border">
+                    <Button type="button" variant="outline" className="w-full">
                       Cancel
                     </Button>
                   </Link>
                   <Button
                     type="submit"
                     disabled={createScan.isPending}
-                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 glow-border"
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {createScan.isPending ? (
                       <>

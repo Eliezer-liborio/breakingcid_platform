@@ -46,13 +46,13 @@ export default function History() {
   };
 
   return (
-    <div className="min-h-screen bg-background cyber-grid">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary glow-text" />
-            <h1 className="text-2xl font-bold glow-text text-primary">BreakingCID</h1>
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">BreakingCID</h1>
           </div>
           
           <nav className="flex items-center gap-4">
@@ -63,7 +63,7 @@ export default function History() {
               <Button variant="ghost" className="text-primary">History</Button>
             </Link>
             <Link href="/scan/new">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-border">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Plus className="w-4 h-4 mr-2" />
                 New Scan
               </Button>
@@ -80,7 +80,7 @@ export default function History() {
           {/* Header */}
           <div>
             <h2 className="text-3xl font-bold text-foreground mb-2">
-              <span className="text-primary glow-text">Scan History</span>
+              <span className="text-primary">Scan History</span>
             </h2>
             <p className="text-muted-foreground">View all your security scans</p>
           </div>
@@ -93,12 +93,12 @@ export default function History() {
               placeholder="Search by target or scan type..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-input border-border/50 focus:border-primary text-foreground"
+              className="pl-10 bg-input border-border text-foreground"
             />
           </div>
 
           {/* Scans List */}
-          <Card className="neon-border bg-card/50 backdrop-blur">
+          <Card className="border-border bg-card">
             <CardHeader>
               <CardTitle className="text-foreground">All Scans</CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -118,7 +118,7 @@ export default function History() {
                   </p>
                   {!searchQuery && (
                     <Link href="/scan/new">
-                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-border">
+                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                         Start Your First Scan
                       </Button>
                     </Link>
@@ -129,7 +129,7 @@ export default function History() {
                   {filteredScans.map((scan) => (
                     <div
                       key={scan.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-all cursor-pointer"
+                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary transition-all cursor-pointer"
                       onClick={() => setLocation(`/scan/${scan.id}`)}
                     >
                       <div className="flex items-center gap-4 flex-1">
@@ -154,7 +154,7 @@ export default function History() {
                       <div className="flex items-center gap-3">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                           scan.status === 'completed' ? 'bg-secondary/20 text-secondary' :
-                          scan.status === 'running' ? 'bg-primary/20 text-primary pulse-glow' :
+                          scan.status === 'running' ? 'bg-primary/20 text-primary' :
                           scan.status === 'failed' ? 'bg-destructive/20 text-destructive' :
                           'bg-muted text-muted-foreground'
                         }`}>

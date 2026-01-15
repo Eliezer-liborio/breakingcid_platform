@@ -37,3 +37,10 @@
 ## Finalização
 - [x] Criar checkpoint final
 - [x] Documentar uso da plataforma
+
+## Melhorias de Design (Feedback do Usuário)
+- [x] Suavizar cores neon para tons mais sutis
+- [x] Remover efeitos de blur/backdrop-blur
+- [x] Criar design mais limpo e minimalista
+- [x] Melhorar contraste e legibilidade
+- [x] Remover glow effects excessivos

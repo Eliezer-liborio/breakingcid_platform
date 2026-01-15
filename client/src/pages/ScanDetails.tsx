@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Shield, Loader2, AlertTriangle, CheckCircle, XCircle, Activity, ArrowLeft, Download } from "lucide-react";
+import { Shield, Loader2, AlertTriangle, CheckCircle, XCircle, Activity, ArrowLeft } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { getLoginUrl } from "@/const";
 import { Streamdown } from "streamdown";
@@ -61,13 +61,13 @@ export default function ScanDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-background cyber-grid">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-primary glow-text" />
-            <h1 className="text-2xl font-bold glow-text text-primary">BreakingCID</h1>
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">BreakingCID</h1>
           </div>
           
           <nav className="flex items-center gap-4">
@@ -95,7 +95,7 @@ export default function ScanDetails() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Scan Not Found</h2>
             <p className="text-muted-foreground mb-6">The requested scan does not exist or you don't have access to it.</p>
             <Link href="/dashboard">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-border">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
               </Button>
@@ -112,7 +112,7 @@ export default function ScanDetails() {
             </Link>
 
             {/* Scan Header */}
-            <Card className="neon-border bg-card/50 backdrop-blur">
+            <Card className="border-border bg-card">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function ScanDetails() {
                   </div>
                   <Badge className={`${
                     scan.status === 'completed' ? 'bg-secondary/20 text-secondary border-secondary' :
-                    scan.status === 'running' ? 'bg-primary/20 text-primary border-primary pulse-glow' :
+                    scan.status === 'running' ? 'bg-primary/20 text-primary border-primary' :
                     scan.status === 'failed' ? 'bg-destructive/20 text-destructive border-destructive' :
                     'bg-muted text-muted-foreground border-muted'
                   } border`}>
@@ -146,7 +146,7 @@ export default function ScanDetails() {
             {/* Vulnerabilities Summary */}
             {scan.status === 'completed' && report?.summary && (
               <div className="grid md:grid-cols-5 gap-4">
-                <Card className="neon-border bg-card/50 backdrop-blur">
+                <Card className="border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
                   </CardHeader>
@@ -155,39 +155,39 @@ export default function ScanDetails() {
                   </CardContent>
                 </Card>
 
-                <Card className="neon-border bg-card/50 backdrop-blur">
+                <Card className="border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Critical</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-destructive glow-text">{report.summary.critical}</div>
+                    <div className="text-2xl font-bold text-destructive">{report.summary.critical}</div>
                   </CardContent>
                 </Card>
 
-                <Card className="neon-border bg-card/50 backdrop-blur">
+                <Card className="border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">High</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-accent glow-text">{report.summary.high}</div>
+                    <div className="text-2xl font-bold text-accent">{report.summary.high}</div>
                   </CardContent>
                 </Card>
 
-                <Card className="neon-border bg-card/50 backdrop-blur">
+                <Card className="border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Medium</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-secondary glow-text">{report.summary.medium}</div>
+                    <div className="text-2xl font-bold text-secondary">{report.summary.medium}</div>
                   </CardContent>
                 </Card>
 
-                <Card className="neon-border bg-card/50 backdrop-blur">
+                <Card className="border-border bg-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">Low</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-primary glow-text">{report.summary.low}</div>
+                    <div className="text-2xl font-bold text-primary">{report.summary.low}</div>
                   </CardContent>
                 </Card>
               </div>
@@ -195,7 +195,7 @@ export default function ScanDetails() {
 
             {/* Vulnerabilities List */}
             {scan.status === 'completed' && vulnerabilities.length > 0 && (
-              <Card className="neon-border bg-card/50 backdrop-blur">
+              <Card className="border-border bg-card">
                 <CardHeader>
                   <CardTitle className="text-foreground">Vulnerabilities Found</CardTitle>
                   <CardDescription className="text-muted-foreground">
@@ -204,7 +204,7 @@ export default function ScanDetails() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {vulnerabilities.map((vuln) => (
-                    <div key={vuln.id} className="p-4 rounded-lg border border-border/50 space-y-3">
+                    <div key={vuln.id} className="p-4 rounded-lg border border-border space-y-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-bold text-foreground mb-1">{vuln.title}</h3>
@@ -230,7 +230,7 @@ export default function ScanDetails() {
 
             {/* Report */}
             {scan.status === 'completed' && report && (
-              <Card className="neon-border bg-card/50 backdrop-blur">
+              <Card className="border-border bg-card">
                 <CardHeader>
                   <CardTitle className="text-foreground">Full Report</CardTitle>
                   <CardDescription className="text-muted-foreground">
@@ -247,7 +247,7 @@ export default function ScanDetails() {
 
             {/* Running Status */}
             {(scan.status === 'running' || scan.status === 'pending') && (
-              <Card className="neon-border bg-card/50 backdrop-blur pulse-glow">
+              <Card className="border-border bg-card">
                 <CardContent className="py-12 text-center">
                   <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-foreground mb-2">Scan in Progress</h3>
@@ -260,7 +260,7 @@ export default function ScanDetails() {
 
             {/* Failed Status */}
             {scan.status === 'failed' && (
-              <Card className="neon-border bg-destructive/10 border-destructive/50">
+              <Card className="border-destructive/50 bg-destructive/10">
                 <CardContent className="py-12 text-center">
                   <XCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-foreground mb-2">Scan Failed</h3>
@@ -268,7 +268,7 @@ export default function ScanDetails() {
                     The security scan encountered an error and could not complete.
                   </p>
                   <Link href="/scan/new">
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 glow-border">
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                       Start New Scan
                     </Button>
                   </Link>
