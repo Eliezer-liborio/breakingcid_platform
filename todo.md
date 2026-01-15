@@ -159,3 +159,10 @@
 - [x] Criar utils/report_generator.py
 - [x] Criar breakingcid.sh script principal
 - [x] Atualizar worker para usar nova estrutura
+
+## Especificação API Backend-Worker
+- [x] Documentar endpoints REST
+- [x] Documentar autenticação
+- [x] Documentar fluxos de comunicação
+- [x] Documentar formato de dados
+- [x] Criar exemplos de requisições
