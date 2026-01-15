@@ -209,3 +209,18 @@
 - [x] Testar admin dashboard com dados reais
 - [ ] Validar performance com múltiplos workers
 - [ ] Testar fallback para HTTP polling se WebSocket falhar
+
+
+## Exibição de Resultados e Download de Relatórios
+
+- [x] Criar componente VulnerabilitiesTable para exibir resultados
+- [x] Mostrar vulnerabilidades no terminal output com formatação
+- [x] Exibir severidade com cores (crítico=vermelho, alto=laranja, médio=amarelo, baixo=azul)
+- [x] Criar seção de resultados com tabela de vulnerabilidades
+- [x] Implementar filtros de severidade nos resultados
+- [x] Criar função de geração de relatório completo (.txt)
+- [x] Adicionar botão de download de relatório com dados completos
+- [x] Incluir gráficos ASCII no relatório
+- [x] Adicionar timestamps e metadados no relatório
+- [x] Testar download com múltiplos tipos de scan
+- [x] Validar formatação do relatório em diferentes sistemas operacionais

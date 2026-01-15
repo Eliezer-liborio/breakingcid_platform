@@ -12,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useLocation } from "wouter";
+import { VulnerabilitiesTable } from "@/components/VulnerabilitiesTable";
+import { generateReportContent, downloadReport } from "@/lib/reportGenerator";
 
 interface TerminalLine {
   text: string;
@@ -152,21 +154,22 @@ export default function Home() {
   };
 
   const handleDownloadReport = () => {
-    if (!scanData?.report) {
-      toast.error("No report available");
+    if (!scanData) {
+      toast.error("No scan data available");
       return;
     }
 
-    const blob = new Blob([scanData.report.content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `breakingcid_scan_${currentScanId}_${Date.now()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
+    const reportContent = generateReportContent({
+      scanId: scanData.scan.id,
+      target: scanData.scan.target,
+      scanType: scanData.scan.scanType,
+      status: scanData.scan.status,
+      createdAt: new Date(scanData.scan.createdAt),
+      duration: scanData.scan.duration,
+      vulnerabilities: scanData.vulnerabilities,
+    });
+
+    downloadReport(reportContent, `breakingcid_scan_${currentScanId}_${Date.now()}.txt`);
     addTerminalLine(`[+] Report downloaded successfully`, 'success');
     toast.success("Report downloaded");
   };
@@ -430,6 +433,22 @@ export default function Home() {
           </Card>
         </div>
       </div>
+
+      {/* Vulnerabilities Section */}
+      {scanData && scanData.vulnerabilities.length > 0 && (
+        <div className="max-w-7xl mx-auto mt-6">
+          <VulnerabilitiesTable vulnerabilities={scanData.vulnerabilities.map((v, idx) => ({
+            id: idx,
+            type: v.type,
+            severity: v.severity as any,
+            title: v.title,
+            description: v.description || '',
+            evidence: v.evidence || '',
+            payload: v.payload || '',
+            timestamp: v.createdAt,
+          }))} />
+        </div>
+      )}
     </div>
   );
 }
