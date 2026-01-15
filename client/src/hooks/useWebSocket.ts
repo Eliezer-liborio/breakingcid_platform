@@ -18,8 +18,8 @@ export function useWebSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket
-    const socket = io(window.location.origin, {
+    // Connect to WebSocket using relative URL
+    const socket = io({
       auth: {
         userId: user.id,
         role: user.role,
@@ -28,7 +28,9 @@ export function useWebSocket() {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      secure: true,
+      rejectUnauthorized: false,
     });
 
     socket.on('connect', () => {

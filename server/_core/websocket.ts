@@ -13,10 +13,13 @@ const clientMap = new Map<string, ClientData>();
 export function setupWebSocket(httpServer: HTTPServer) {
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.NODE_ENV === "development" ? "*" : undefined,
+      origin: true,
       methods: ["GET", "POST"],
+      credentials: true,
     },
     transports: ["websocket", "polling"],
+    pingInterval: 25000,
+    pingTimeout: 60000,
   });
 
   // Middleware for authentication
@@ -24,12 +27,10 @@ export function setupWebSocket(httpServer: HTTPServer) {
     const userId = socket.handshake.auth.userId;
     const role = socket.handshake.auth.role;
 
-    if (!userId) {
-      return next(new Error("Authentication failed: missing userId"));
-    }
-
-    socket.data.userId = userId;
+    // Allow connection even without userId, but mark as unauthenticated
+    socket.data.userId = userId || `anonymous-${socket.id}`;
     socket.data.role = role || "user";
+    socket.data.authenticated = !!userId;
     next();
   });
 
