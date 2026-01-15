@@ -116,3 +116,35 @@
 - [x] Identificar caminho absoluto do Python 3.10 (/usr/bin/python3.10)
 - [x] Modificar backend para usar /usr/bin/python3.10
 - [x] Testar execução dos scanners
+
+## Reestruturação - Arquitetura Cliente-Servidor com Worker Remoto
+
+### Planejamento
+- [ ] Definir arquitetura: Frontend → Backend API → Job Queue → Worker Server
+- [ ] Escolher sistema de queue (Redis + Bull ou banco de dados simples)
+- [ ] Definir formato de comunicação (REST API ou WebSocket)
+- [ ] Planejar estrutura de jobs (status, logs, resultados)
+
+### Backend API (Atual)
+- [ ] Remover execução direta de scripts Python
+- [x] Implementar sistema de jobs no banco de dados (campos workerId, workerPickedAt)
+- [x] Criar API endpoint para worker buscar jobs pendentes (GET /api/worker/jobs/pending)
+- [x] Criar API endpoint para worker enviar logs em tempo real (POST /api/worker/jobs/:id/logs)
+- [x] Criar API endpoint para worker enviar resultados (POST /api/worker/jobs/:id/results)
+- [x] Adicionar autenticação para worker server (X-Worker-API-Key header)
+
+### Worker Server (Novo)
+- [ ] Criar script de setup para Ubuntu/Kali
+- [x] Criar worker client que se conecta ao backend (worker_client.py)
+- [x] Implementar polling de jobs pendentes
+- [x] Criar scripts .sh para ferramentas bash (subdomain_enum.sh)
+- [x] Criar scripts .py para ferramentas Python (XSS, SSRF, HTTP Smuggling)
+- [x] Implementar envio de logs progressivos
+- [x] Implementar envio de resultados finais
+- [x] Adicionar tratamento de erros e retry
+
+### Documentação
+- [x] Criar guia de instalação do worker server (worker/README.md)
+- [x] Documentar dependências necessárias (Kali tools)
+- [x] Criar script de instalação automática (worker/setup.sh)
+- [x] Documentar configuração de API key

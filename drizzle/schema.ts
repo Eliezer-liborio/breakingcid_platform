@@ -28,6 +28,8 @@ export const scans = mysqlTable("scans", {
   target: varchar("target", { length: 512 }).notNull(),
   scope: text("scope"),
   status: mysqlEnum("status", ["pending", "running", "completed", "failed"]).default("pending").notNull(),
+  workerId: varchar("workerId", { length: 128 }), // ID do worker que pegou o job
+  workerPickedAt: timestamp("workerPickedAt"), // Quando o worker pegou o job
   startedAt: timestamp("startedAt").defaultNow().notNull(),
   completedAt: timestamp("completedAt"),
   duration: int("duration"), // in seconds

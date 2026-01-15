@@ -132,6 +132,13 @@ export async function updateScanStatus(
   await db.update(scans).set({ status, completedAt, duration }).where(eq(scans.id, id));
 }
 
+export async function updateScan(id: number, updates: Partial<InsertScan>): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(scans).set(updates).where(eq(scans.id, id));
+}
+
 // ============ VULNERABILITIES ============
 
 export async function createVulnerability(vuln: InsertVulnerability): Promise<number> {
