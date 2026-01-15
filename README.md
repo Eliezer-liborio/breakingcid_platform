@@ -1,14 +1,19 @@
-Http sacan
-
-##  Funcionalidades
-
-### Módulos de Segurança
+░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░ ░▒▓███████▓▒░░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓████████▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░             ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░  ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ 
+                                                                                                          
+                                                                                                          
+Módulos de Segurança
 
 - **HTTP Request Smuggling**: Testes CL.TE, TE.CL e TE.TE baseados na pesquisa de James Kettle (PortSwigger)
 - **SSRF Detection**: Scanner de Server-Side Request Forgery com detecção de cloud metadata (AWS, GCP, Azure) e serviços internos
 - **Comprehensive Scan**: Execução de todos os módulos de segurança simultaneamente
 
-### Sistema de Gerenciamento
+Sistema de Gerenciamento
 
 - **Autenticação**: Sistema completo com controle de acesso (admin/usuário)
 - **Dashboard Interativo**: Visualização em tempo real de estatísticas e vulnerabilidades
@@ -20,14 +25,7 @@ Http sacan
   - Recomendações de remediação
   - CVSS scores
 
-### Interface Visual
-
-- **Tema Dark Cyberpunk**: Visual moderno com cores neon (cyan, magenta, roxo)
-- **Efeitos Visuais**: Glow effects, neon borders, cyber grid background
-- **Responsivo**: Design adaptável para desktop e mobile
-- **Real-time Updates**: Atualização automática de status de scans
-
-##  Como Usar
+Como Usar
 
 ### 1. Acessar a Plataforma
 
@@ -138,7 +136,7 @@ Detecta vulnerabilidades de Server-Side Request Forgery testando:
 
 ##  Metodologia
 
-Os testes seguem padrões da indústria:
+Os testes seguem padrões :
 
 - **OWASP Testing Guide v4.2**
 - **NIST SP 800-115**
