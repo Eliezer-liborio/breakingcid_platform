@@ -224,3 +224,43 @@
 - [x] Adicionar timestamps e metadados no relatório
 - [x] Testar download com múltiplos tipos de scan
 - [x] Validar formatação do relatório em diferentes sistemas operacionais
+
+
+## Correções de UI e Melhorias de UX
+
+- [x] Corrigir foco do botão LOGIN (remover desfoque)
+- [x] Melhorar contraste do texto de autenticação
+- [x] Adicionar efeito de hover no botão LOGIN
+- [x] Implementar animação de entrada suave
+
+## Terminal Output - Evolução do Ataque
+
+- [x] Mostrar etapas detalhadas: reconnaissance, scanning, analysis, exploitation, reporting
+- [x] Adicionar progresso percentual do scan
+- [x] Mostrar ferramentas sendo executadas (nmap, amass, subfinder, etc)
+- [x] Exibir hosts/subdomínios descobertos em tempo real
+- [x] Mostrar vulnerabilidades encontradas conforme descobertas
+- [x] Adicionar timestamps para cada evento
+- [x] Implementar indicadores visuais de progresso
+- [x] Mostrar estatísticas em tempo real (hosts encontrados, vulns, etc)
+
+## Exportação em Múltiplos Formatos
+
+- [x] Instalar dependências (pdfkit, jsPDF, json-stringify-safe)
+- [x] Criar função de exportação para PDF
+- [x] Criar função de exportação para JSON
+- [x] Adicionar botões de download para cada formato
+- [x] Testar geração de PDF com dados complexos
+- [x] Testar exportação JSON com estrutura completa
+- [x] Adicionar opções de customização de formato
+
+## Relatórios Combinados
+
+- [x] Criar página de seleção de múltiplos scans
+- [x] Implementar checkbox para selecionar scans
+- [x] Criar função para combinar dados de múltiplos scans
+- [x] Gerar relatório combinado com comparação
+- [x] Adicionar gráficos comparativos
+- [x] Exportar relatório combinado em todos os formatos
+- [x] Mostrar tendências e evolução de vulnerabilidades
+- [x] Adicionar análise de risco consolidada

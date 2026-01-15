@@ -14,6 +14,10 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { useLocation } from "wouter";
 import { VulnerabilitiesTable } from "@/components/VulnerabilitiesTable";
 import { generateReportContent, downloadReport } from "@/lib/reportGenerator";
+import { AttackEvolutionDisplay } from "@/components/AttackEvolutionDisplay";
+import { getPhases, calculateTotalProgress, parseAttackLog, extractProgressFromLog, extractDetailsFromLog } from "@/lib/attackEvolution";
+import type { AttackEvolution } from "@/lib/attackEvolution";
+import { exportToPDF, exportToJSON, exportToCSV, exportToXML } from "@/lib/multiFormatReportExporter";
 
 interface TerminalLine {
   text: string;
@@ -29,12 +33,23 @@ export default function Home() {
   const [verbose, setVerbose] = useState(false);
   const [currentScanId, setCurrentScanId] = useState<number | null>(null);
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([]);
+  const [attackEvolution, setAttackEvolution] = useState<AttackEvolution | null>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const { isConnected, logs, subscribeScan, unsubscribeScan } = useWebSocket();
 
   const createScan = trpc.scans.create.useMutation({
     onSuccess: (data) => {
       setCurrentScanId(data.scanId);
+      const phases = getPhases(scanType);
+      setAttackEvolution({
+        scanId: data.scanId,
+        scanType,
+        target,
+        phases,
+        totalProgress: 0,
+        currentPhase: phases[0]?.id || 'reconnaissance',
+        startTime: new Date(),
+      });
       addTerminalLine(`[+] Scan initiated with ID: ${data.scanId}`, 'success');
       addTerminalLine(`[*] Status: ${data.status}`, 'info');
       addTerminalLine(`[*] Waiting for worker to pick up job...`, 'info');
@@ -153,13 +168,13 @@ export default function Home() {
     createScan.mutate({ target, scanType });
   };
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = (format: 'txt' | 'pdf' | 'json' | 'csv' | 'xml' = 'txt') => {
     if (!scanData) {
       toast.error("No scan data available");
       return;
     }
 
-    const reportContent = generateReportContent({
+    const reportData = {
       scanId: scanData.scan.id,
       target: scanData.scan.target,
       scanType: scanData.scan.scanType,
@@ -167,12 +182,33 @@ export default function Home() {
       createdAt: new Date(scanData.scan.createdAt),
       duration: scanData.scan.duration,
       vulnerabilities: scanData.vulnerabilities,
-    });
+    };
 
-    downloadReport(reportContent, `breakingcid_scan_${currentScanId}_${Date.now()}.txt`);
-    addTerminalLine(`[+] Report downloaded successfully`, 'success');
-    toast.success("Report downloaded");
-  };
+    const timestamp = Date.now();
+    const baseFilename = `breakingcid_scan_${currentScanId}_${timestamp}`;
+
+    switch (format) {
+      case 'txt':
+        const reportContent = generateReportContent(reportData);
+        downloadReport(reportContent, `${baseFilename}.txt`);
+        break;
+      case 'pdf':
+        exportToPDF(reportData, `${baseFilename}.pdf`);
+        break;
+      case 'json':
+        exportToJSON(reportData, `${baseFilename}.json`);
+        break;
+      case 'csv':
+        exportToCSV(reportData, `${baseFilename}.csv`);
+        break;
+      case 'xml':
+        exportToXML(reportData, `${baseFilename}.xml`);
+        break;
+    }
+
+    addTerminalLine(`[+] Report downloaded in ${format.toUpperCase()} format`, 'success');
+    toast.success(`Report downloaded (${format.toUpperCase()})`);
+  };;
 
   const handleNewScan = () => {
     if (currentScanId) {
@@ -227,7 +263,7 @@ export default function Home() {
             </div>
             <Button
               onClick={() => window.location.href = getLoginUrl()}
-              className="w-full bg-green-600 hover:bg-green-700 text-black font-mono font-bold"
+              className="w-full bg-green-500 hover:bg-green-600 text-black font-mono font-bold text-lg py-6 transition-all duration-200 shadow-lg hover:shadow-green-500/50 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-black"
             >
               &gt; LOGIN
             </Button>
@@ -251,6 +287,13 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setLocation('/combined-reports')}
+              variant="outline"
+              className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-sm"
+            >
+              COMBINED REPORTS
+            </Button>
             {user?.role === 'admin' && (
               <Button
                 onClick={() => setLocation('/admin')}
@@ -348,13 +391,39 @@ export default function Home() {
 
                 {scanData?.scan.status === 'completed' && (
                   <>
-                    <Button
-                      onClick={handleDownloadReport}
-                      variant="outline"
-                      className="w-full border-green-500/30 text-green-500 hover:bg-green-500/10"
-                    >
-                      <Download className="w-4 h-4 mr-2" /> DOWNLOAD REPORT
-                    </Button>
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-400 font-mono">EXPORT FORMAT:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          onClick={() => handleDownloadReport('txt')}
+                          variant="outline"
+                          className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-xs"
+                        >
+                          <Download className="w-3 h-3 mr-1" /> TXT
+                        </Button>
+                        <Button
+                          onClick={() => handleDownloadReport('pdf')}
+                          variant="outline"
+                          className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-xs"
+                        >
+                          <Download className="w-3 h-3 mr-1" /> PDF
+                        </Button>
+                        <Button
+                          onClick={() => handleDownloadReport('json')}
+                          variant="outline"
+                          className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-xs"
+                        >
+                          <Download className="w-3 h-3 mr-1" /> JSON
+                        </Button>
+                        <Button
+                          onClick={() => handleDownloadReport('csv')}
+                          variant="outline"
+                          className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-xs"
+                        >
+                          <Download className="w-3 h-3 mr-1" /> CSV
+                        </Button>
+                      </div>
+                    </div>
                     <Button
                       onClick={handleNewScan}
                       variant="outline"
@@ -404,6 +473,12 @@ export default function Home() {
             <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
               <span className="text-green-500">&gt;</span> TERMINAL OUTPUT
             </h2>
+            
+            {attackEvolution && currentScanId && (
+              <div className="mb-6 pb-6 border-b border-green-500/30">
+                <AttackEvolutionDisplay evolution={attackEvolution} />
+              </div>
+            )}
             
             <div 
               ref={terminalRef}

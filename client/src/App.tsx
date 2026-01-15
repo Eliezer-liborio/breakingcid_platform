@@ -4,6 +4,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
+import CombinedReports from "./pages/CombinedReports";
 import { useLocation } from "wouter";
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
-          {location === '/admin' ? <AdminDashboard /> : <Home />}
+          {location === '/admin' ? <AdminDashboard /> : location === '/combined-reports' ? <CombinedReports /> : <Home />}
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
