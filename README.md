@@ -1,6 +1,4 @@
-# BreakingCID - Offensive Security Testing Platform http scan
-
-Uma plataforma web completa para execução e gerenciamento de testes de vulnerabilidades em aplicações, com integração de ferramentas do Kali Linux e visual cyberpunk/hacker moderno.
+Http sacan
 
 ##  Funcionalidades
 
