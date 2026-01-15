@@ -1,0 +1,47 @@
+[Unit]
+Description=BreakingCID Offensive Security Worker
+Documentation=https://github.com/yourusername/breakingcid
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/breakingcid-worker
+
+# Environment variables
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+EnvironmentFile=/opt/breakingcid-worker/.env
+
+# Execute worker
+ExecStart=/usr/bin/python3.10 /opt/breakingcid-worker/worker_client.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Process management
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=breakingcid-worker
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=65535
+
+# Security
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/breakingcid-worker/logs /opt/breakingcid-worker/results
+
+[Install]
+WantedBy=multi-user.target

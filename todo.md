@@ -173,3 +173,10 @@
 - [x] Atualizar frontend para mostrar status "Waiting for worker"
 - [x] Adicionar mensagem sobre configuração de worker
 - [x] Testar criação de jobs sem execução local
+
+## Deploy Worker em Servidor Kali Linux
+- [x] Criar script deploy.sh automatizado
+- [x] Criar arquivo de configuração .env para worker
+- [x] Criar systemd service para iniciar worker automaticamente
+- [x] Criar script de monitoramento do worker
+- [x] Documentar processo de deploy passo a passo (WORKER_DEPLOYMENT_GUIDE.md)

@@ -1,0 +1,27 @@
+# BreakingCID Worker Configuration
+# Copy this file to .env and configure with your values
+
+# Backend API Configuration
+BACKEND_URL=http://your-backend-server.com
+WORKER_API_KEY=your-secret-api-key-here
+WORKER_ID=worker-001
+WORKER_NAME=Kali-Worker-01
+
+# Polling Configuration (seconds)
+POLL_INTERVAL=5
+MAX_RETRIES=3
+RETRY_DELAY=2
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=/opt/breakingcid-worker/logs/worker.log
+
+# Timeout Settings (in seconds)
+SCAN_TIMEOUT=300
+HTTP_TIMEOUT=30
+
+# Concurrent Scans
+MAX_CONCURRENT_SCANS=2
+
+# Verbose Output
+VERBOSE=true
