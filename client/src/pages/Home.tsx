@@ -7,28 +7,39 @@ import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Terminal, Download, Play, Loader2 } from "lucide-react";
+import { Terminal, Download, Play, Loader2, Zap } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { useLocation } from "wouter";
+
+interface TerminalLine {
+  text: string;
+  level: 'info' | 'success' | 'warning' | 'error' | 'verbose' | 'header';
+  timestamp: Date;
+}
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
   const [target, setTarget] = useState("");
   const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "subdomain_enum" | "comprehensive">("xss");
   const [verbose, setVerbose] = useState(false);
   const [currentScanId, setCurrentScanId] = useState<number | null>(null);
-  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const { isConnected, logs, subscribeScan, unsubscribeScan } = useWebSocket();
 
   const createScan = trpc.scans.create.useMutation({
     onSuccess: (data) => {
       setCurrentScanId(data.scanId);
-      addTerminalLine(`[+] Scan initiated with ID: ${data.scanId}`);
-      addTerminalLine(`[*] Status: ${data.status}`);
-      addTerminalLine(`[*] Waiting for results...`);
+      addTerminalLine(`[+] Scan initiated with ID: ${data.scanId}`, 'success');
+      addTerminalLine(`[*] Status: ${data.status}`, 'info');
+      addTerminalLine(`[*] Waiting for worker to pick up job...`, 'info');
+      subscribeScan(data.scanId);
     },
     onError: (error) => {
-      addTerminalLine(`[!] ERROR: ${error.message}`);
+      addTerminalLine(`[!] ERROR: ${error.message}`, 'error');
       toast.error("Scan failed", { description: error.message });
     },
   });
@@ -40,14 +51,13 @@ export default function Home() {
       refetchInterval: (query) => {
         const data = query.state.data;
         if (data?.scan.status === 'running' || data?.scan.status === 'pending') {
-          return 2000; // Poll every 2 seconds
+          return 2000;
         }
         return false;
       }
     }
   );
 
-  // Poll logs in real-time
   const { data: logsData } = trpc.scans.getLogs.useQuery(
     { scanId: currentScanId! },
     { 
@@ -55,7 +65,7 @@ export default function Home() {
       refetchInterval: (query) => {
         const scanStatus = scanData?.scan.status;
         if (scanStatus === 'running' || scanStatus === 'pending') {
-          return 1000; // Poll logs every 1 second
+          return 1000;
         }
         return false;
       }
@@ -65,40 +75,52 @@ export default function Home() {
   useEffect(() => {
     if (scanData) {
       if (scanData.scan.status === 'completed') {
-        addTerminalLine(`[+] Scan completed successfully!`);
-        addTerminalLine(`[+] Found ${scanData.vulnerabilities.length} vulnerabilities`);
+        addTerminalLine(`[+] Scan completed successfully!`, 'success');
+        addTerminalLine(`[+] Found ${scanData.vulnerabilities.length} vulnerabilities`, 'success');
         
         const summary = scanData.report?.summary;
         if (summary) {
-          addTerminalLine(`[*] Critical: ${summary.critical} | High: ${summary.high} | Medium: ${summary.medium} | Low: ${summary.low}`);
+          addTerminalLine(`[*] Critical: ${summary.critical} | High: ${summary.high} | Medium: ${summary.medium} | Low: ${summary.low}`, 'info');
         }
       } else if (scanData.scan.status === 'failed') {
-        addTerminalLine(`[!] Scan failed`);
+        addTerminalLine(`[!] Scan failed`, 'error');
       } else if (scanData.scan.status === 'running') {
-        if (terminalOutput[terminalOutput.length - 1] !== '[*] Scan in progress...') {
-          addTerminalLine(`[*] Scan in progress...`);
+        if (terminalLines[terminalLines.length - 1]?.text !== '[*] Scan in progress...') {
+          addTerminalLine(`[*] Scan in progress...`, 'info');
         }
       }
     }
   }, [scanData]);
 
-  // Update terminal with real-time logs from database
   useEffect(() => {
     if (logsData && logsData.length > 0) {
-      // Clear terminal and show logs from database
-      const logMessages = logsData.map(log => log.message);
-      setTerminalOutput(logMessages);
+      const logMessages = logsData.map(log => ({
+        text: log.message,
+        level: (log.message.startsWith('[+]') ? 'success' : 
+                log.message.startsWith('[!]') ? 'error' :
+                log.message.startsWith('[VERBOSE]') ? 'verbose' : 'info') as any,
+        timestamp: new Date(log.timestamp)
+      }));
+      setTerminalLines(logMessages);
     }
   }, [logsData]);
+
+  // WebSocket logs
+  useEffect(() => {
+    if (logs.length > 0) {
+      const latestLog = logs[logs.length - 1];
+      addTerminalLine(latestLog.message, latestLog.level);
+    }
+  }, [logs]);
 
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [terminalOutput]);
+  }, [terminalLines]);
 
-  const addTerminalLine = (line: string) => {
-    setTerminalOutput(prev => [...prev, line]);
+  const addTerminalLine = (text: string, level: TerminalLine['level'] = 'info') => {
+    setTerminalLines(prev => [...prev, { text, level, timestamp: new Date() }]);
   };
 
   const handleExecute = () => {
@@ -114,15 +136,17 @@ export default function Home() {
       return;
     }
 
-    setTerminalOutput([]);
-    addTerminalLine(`╔═══════════════════════════════════════════════════════════════╗`);
-    addTerminalLine(`║              BREAKINGCID SECURITY SCANNER v2.0              ║`);
-    addTerminalLine(`╚═══════════════════════════════════════════════════════════════╝`);
-    addTerminalLine(``);
-    addTerminalLine(`[*] Target: ${target}`);
-    addTerminalLine(`[*] Scan Type: ${scanType.toUpperCase().replace('_', ' ')}`);
-    addTerminalLine(`[*] Initializing scanner modules...`);
-    addTerminalLine(``);
+    setTerminalLines([]);
+    addTerminalLine(`╔═══════════════════════════════════════════════════════════════╗`, 'header');
+    addTerminalLine(`║              BREAKINGCID SECURITY SCANNER v2.0              ║`, 'header');
+    addTerminalLine(`╚═══════════════════════════════════════════════════════════════╝`, 'header');
+    addTerminalLine(``, 'info');
+    addTerminalLine(`[*] Target: ${target}`, 'info');
+    addTerminalLine(`[*] Scan Type: ${scanType.toUpperCase().replace('_', ' ')}`, 'info');
+    addTerminalLine(`[*] Verbose Mode: ${verbose ? 'ENABLED' : 'DISABLED'}`, 'info');
+    addTerminalLine(`[*] WebSocket: ${isConnected ? 'CONNECTED' : 'CONNECTING'}`, 'info');
+    addTerminalLine(`[*] Initializing scanner modules...`, 'info');
+    addTerminalLine(``, 'info');
 
     createScan.mutate({ target, scanType });
   };
@@ -143,14 +167,28 @@ export default function Home() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    addTerminalLine(`[+] Report downloaded successfully`);
+    addTerminalLine(`[+] Report downloaded successfully`, 'success');
     toast.success("Report downloaded");
   };
 
   const handleNewScan = () => {
+    if (currentScanId) {
+      unsubscribeScan(currentScanId);
+    }
     setCurrentScanId(null);
-    setTerminalOutput([]);
+    setTerminalLines([]);
     setTarget("");
+  };
+
+  const getTerminalLineColor = (level: TerminalLine['level']) => {
+    switch (level) {
+      case 'success': return 'text-green-500';
+      case 'error': return 'text-red-500';
+      case 'warning': return 'text-yellow-500';
+      case 'verbose': return 'text-cyan-400';
+      case 'header': return 'text-green-400';
+      default: return 'text-blue-400';
+    }
   };
 
   if (loading) {
@@ -204,9 +242,24 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Terminal className="w-6 h-6" />
             <h1 className="text-2xl font-bold">BREAKINGCID</h1>
+            <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${isConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+              <Zap className="w-3 h-3" />
+              {isConnected ? 'WEBSOCKET CONNECTED' : 'WEBSOCKET DISCONNECTED'}
+            </div>
           </div>
-          <div className="text-sm text-gray-400">
-            USER: {user?.name || user?.email} | ROLE: {user?.role?.toUpperCase()}
+          <div className="flex items-center gap-4">
+            {user?.role === 'admin' && (
+              <Button
+                onClick={() => setLocation('/admin')}
+                variant="outline"
+                className="border-green-500/30 text-green-500 hover:bg-green-500/10 text-sm"
+              >
+                ADMIN
+              </Button>
+            )}
+            <div className="text-sm text-gray-400">
+              USER: {user?.name || user?.email} | ROLE: {user?.role?.toUpperCase()}
+            </div>
           </div>
         </div>
         <div className="h-px bg-green-500/30"></div>
@@ -353,18 +406,17 @@ export default function Home() {
               ref={terminalRef}
               className="bg-black border border-green-500/30 rounded p-4 h-[calc(100%-3rem)] overflow-y-auto font-mono text-sm"
             >
-              {terminalOutput.length === 0 ? (
+              {terminalLines.length === 0 ? (
                 <div className="text-gray-600">
                   <p>&gt; Awaiting command...</p>
                   <p className="mt-2">&gt; Select scan type, enter target URL, and execute.</p>
                 </div>
               ) : (
-                terminalOutput.map((line, index) => (
+                terminalLines.map((line, index) => (
                   <div key={index} className="mb-1">
-                    {line.startsWith('[+]') && <span className="text-green-500">{line}</span>}
-                    {line.startsWith('[*]') && <span className="text-blue-400">{line}</span>}
-                    {line.startsWith('[!]') && <span className="text-red-500">{line}</span>}
-                    {!line.startsWith('[') && <span className="text-gray-400">{line}</span>}
+                    <span className={getTerminalLineColor(line.level)}>
+                      {line.text}
+                    </span>
                   </div>
                 ))
               )}

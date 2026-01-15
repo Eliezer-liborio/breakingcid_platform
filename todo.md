@@ -180,3 +180,32 @@
 - [x] Criar systemd service para iniciar worker automaticamente
 - [x] Criar script de monitoramento do worker
 - [x] Documentar processo de deploy passo a passo (WORKER_DEPLOYMENT_GUIDE.md)
+
+
+## WebSocket e Terminal Output - Streaming em Tempo Real
+
+- [x] Implementar WebSocket server no backend (Socket.io ou ws)
+- [x] Substituir HTTP polling por WebSocket para logs em tempo real
+- [x] Melhorar terminal output com status geral + detalhado
+- [x] Adicionar prefixos coloridos ao terminal ([+], [*], [!], [VERBOSE])
+- [x] Implementar animação de cursor piscando durante execução
+- [ ] Mostrar progresso percentual do scan
+
+## Admin Dashboard - Monitoramento de Workers
+
+- [x] Criar página /admin com autenticação (apenas usuários logados)
+- [x] Listar workers ativos com status (online/offline/idle/busy)
+- [x] Mostrar job queue (pending, running, completed)
+- [x] Exibir métricas de workers (uptime, scans completados, taxa de sucesso)
+- [x] Health check de workers (última conexão, latência)
+- [x] Gráficos de performance (scans por hora, tempo médio, vulnerabilidades encontradas)
+- [x] Logs de sistema (eventos de workers, erros, alertas)
+- [ ] Controles de gerenciamento (pausar/retomar workers, limpar fila)
+
+## Testes e Validação
+
+- [x] Testar WebSocket com múltiplos clientes simultâneos
+- [x] Validar streaming de logs em tempo real
+- [x] Testar admin dashboard com dados reais
+- [ ] Validar performance com múltiplos workers
+- [ ] Testar fallback para HTTP polling se WebSocket falhar
