@@ -47,6 +47,21 @@ export default function Home() {
     }
   );
 
+  // Poll logs in real-time
+  const { data: logsData } = trpc.scans.getLogs.useQuery(
+    { scanId: currentScanId! },
+    { 
+      enabled: currentScanId !== null,
+      refetchInterval: (query) => {
+        const scanStatus = scanData?.scan.status;
+        if (scanStatus === 'running' || scanStatus === 'pending') {
+          return 1000; // Poll logs every 1 second
+        }
+        return false;
+      }
+    }
+  );
+
   useEffect(() => {
     if (scanData) {
       if (scanData.scan.status === 'completed') {
@@ -66,6 +81,15 @@ export default function Home() {
       }
     }
   }, [scanData]);
+
+  // Update terminal with real-time logs from database
+  useEffect(() => {
+    if (logsData && logsData.length > 0) {
+      // Clear terminal and show logs from database
+      const logMessages = logsData.map(log => log.message);
+      setTerminalOutput(logMessages);
+    }
+  }, [logsData]);
 
   useEffect(() => {
     if (terminalRef.current) {

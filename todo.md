@@ -101,3 +101,13 @@
 - [x] Verificar logs de erro no backend
 - [x] Corrigir problema de execução (mudado para python3.10)
 - [x] Validar todos os scanners funcionando
+
+## Streaming de Logs em Tempo Real
+- [x] Investigar causa dos scan failed (dependências Python 3.10 instaladas)
+- [x] Modificar scanners Python para output progressivo linha por linha
+- [x] Implementar captura de stderr no backend
+- [x] Criar endpoint tRPC para streaming de logs (scans.getLogs)
+- [x] Salvar logs no banco de dados em tempo real
+- [x] Atualizar frontend para exibir logs em tempo real
+- [x] Mostrar cada request, payload e resposta no terminal
+- [x] Testar streaming com todos os scanners

@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, scans, InsertScan, Scan, vulnerabilities, InsertVulnerability, Vulnerability, reports, InsertReport, Report } from "../drizzle/schema";
+import { InsertUser, users, scans, InsertScan, Scan, vulnerabilities, InsertVulnerability, Vulnerability, reports, InsertReport, Report, scanLogs, InsertScanLog, ScanLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -165,4 +165,20 @@ export async function getReportByScanId(scanId: number): Promise<Report | undefi
 
   const result = await db.select().from(reports).where(eq(reports.scanId, scanId)).limit(1);
   return result[0];
+}
+
+// ============ SCAN LOGS ============
+
+export async function createScanLog(log: InsertScanLog): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(scanLogs).values(log);
+}
+
+export async function getScanLogsByScanId(scanId: number): Promise<ScanLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(scanLogs).where(eq(scanLogs.scanId, scanId)).orderBy(scanLogs.timestamp);
 }

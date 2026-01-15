@@ -13,7 +13,9 @@ import {
   createVulnerability,
   getVulnerabilitiesByScanId,
   createReport,
-  getReportByScanId
+  getReportByScanId,
+  createScanLog,
+  getScanLogsByScanId
 } from "./db";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -100,6 +102,13 @@ export const appRouter = router({
         };
       }),
 
+    // Get scan logs in real-time
+    getLogs: protectedProcedure
+      .input(z.object({ scanId: z.number() }))
+      .query(async ({ input }) => {
+        return await getScanLogsByScanId(input.scanId);
+      }),
+
     // Get scan statistics
     stats: protectedProcedure.query(async ({ ctx }) => {
       const scans = ctx.user.role === 'admin' 
@@ -150,26 +159,41 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
     let result: any;
     const modulesPath = path.join(process.cwd(), 'server', 'modules');
 
-    // Helper function to execute with retry
+    // Helper to save log to database
+    const saveLog = async (message: string) => {
+      try {
+        await createScanLog({ scanId, message });
+        console.log(`[Scan ${scanId}] ${message}`);
+      } catch (error) {
+        console.error(`[Scan ${scanId}] Failed to save log:`, error);
+      }
+    };
+
+    // Helper function to execute with retry and log streaming
     const execWithRetry = async (command: string, timeout: number, maxRetries = 3) => {
       let lastError;
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          console.log(`[Scan ${scanId}] Attempt ${attempt}/${maxRetries}: ${command}`);
+          await saveLog(`[*] Attempt ${attempt}/${maxRetries}: Starting scan...`);
           const { stdout, stderr } = await execAsync(command, { timeout });
+          
           if (stderr) {
-            // Log stderr output (includes verbose logs)
-            console.log(`[Scan ${scanId}] stderr:`, stderr);
-            if (stderr.includes('Error') && !stderr.includes('[VERBOSE]')) {
-              console.warn(`[Scan ${scanId}] Warning in stderr:`, stderr);
+            // Parse and save stderr logs line by line
+            const lines = stderr.split('\n').filter(line => line.trim());
+            for (const line of lines) {
+              if (line.includes('[VERBOSE]') || line.includes('[*]') || line.includes('[+]') || line.includes('[!]')) {
+                await saveLog(line);
+              }
             }
           }
+          
           return { stdout, stderr };
         } catch (error: any) {
           lastError = error;
-          console.error(`[Scan ${scanId}] Attempt ${attempt} failed:`, error.message);
+          await saveLog(`[!] Attempt ${attempt} failed: ${error.message}`);
           if (attempt < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+            await saveLog(`[*] Retrying in ${attempt} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
           }
         }
       }

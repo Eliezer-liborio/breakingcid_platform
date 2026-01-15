@@ -77,3 +77,16 @@ export const reports = mysqlTable("reports", {
 
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = typeof reports.$inferInsert;
+
+/**
+ * Scan Logs table - stores real-time scan execution logs
+ */
+export const scanLogs = mysqlTable("scanLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  scanId: int("scanId").notNull(),
+  message: text("message").notNull(),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export type ScanLog = typeof scanLogs.$inferSelect;
+export type InsertScanLog = typeof scanLogs.$inferInsert;
