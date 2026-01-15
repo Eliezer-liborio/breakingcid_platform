@@ -16,28 +16,31 @@ export function useWebSocket() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
-
-    // Connect to WebSocket
+    // Connect to WebSocket with or without user
     const socket = io(window.location.origin, {
-      auth: {
+      auth: user ? {
         userId: user.id,
         role: user.role,
-      },
+      } : {},
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
     });
 
     socket.on('connect', () => {
-      console.log('[WebSocket] Connected');
+      console.log('[WebSocket] Connected successfully');
       setIsConnected(true);
     });
 
-    socket.on('disconnect', () => {
-      console.log('[WebSocket] Disconnected');
+    socket.on('connect_error', (error) => {
+      console.error('[WebSocket] Connection error:', error);
+      setIsConnected(false);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('[WebSocket] Disconnected:', reason);
       setIsConnected(false);
     });
 
@@ -46,8 +49,12 @@ export function useWebSocket() {
       setLogs((prev) => [...prev, log]);
     });
 
+    socket.on('subscribed:scan', (data: any) => {
+      console.log('[WebSocket] Subscribed to scan:', data);
+    });
+
     socket.on('error', (error) => {
-      console.error('[WebSocket] Error:', error);
+      console.error('[WebSocket] Socket error:', error);
     });
 
     socketRef.current = socket;

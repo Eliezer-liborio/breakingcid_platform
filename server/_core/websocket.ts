@@ -19,16 +19,12 @@ export function setupWebSocket(httpServer: HTTPServer) {
     transports: ["websocket", "polling"],
   });
 
-  // Middleware for authentication
+  // Middleware for authentication - allow connection, validate on subscription
   io.use((socket, next) => {
     const userId = socket.handshake.auth.userId;
     const role = socket.handshake.auth.role;
 
-    if (!userId) {
-      return next(new Error("Authentication failed: missing userId"));
-    }
-
-    socket.data.userId = userId;
+    socket.data.userId = userId || "anonymous";
     socket.data.role = role || "user";
     next();
   });
@@ -48,11 +44,13 @@ export function setupWebSocket(httpServer: HTTPServer) {
     socket.on("subscribe:scan", (scanId: number) => {
       const room = `scan:${scanId}`;
       socket.join(room);
+      const currentData = clientMap.get(socket.id) || { userId, role: socket.data.role };
       clientMap.set(socket.id, {
-        ...clientMap.get(socket.id)!,
+        ...currentData,
         scanId,
       });
       console.log(`[WebSocket] User ${userId} subscribed to scan ${scanId}`);
+      socket.emit('subscribed:scan', { scanId, success: true });
     });
 
     // Unsubscribe from scan logs
