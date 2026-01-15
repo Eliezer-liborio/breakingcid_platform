@@ -44,3 +44,14 @@
 - [x] Criar design mais limpo e minimalista
 - [x] Melhorar contraste e legibilidade
 - [x] Remover glow effects excessivos
+
+## Implementação XSS Scanner
+- [x] Criar módulo Python para XSS Scanner
+- [x] Adicionar suporte a Reflected XSS
+- [x] Adicionar suporte a DOM-based XSS
+- [x] Adicionar suporte a Stored XSS
+- [x] Adicionar suporte a Template Injection
+- [x] Integrar XSS scanner no backend (routers.ts)
+- [x] Adicionar tipo de scan "xss" no frontend
+- [x] Atualizar schema do banco de dados se necessário
+- [x] Testar execução de scans XSS

@@ -17,7 +17,7 @@ export default function NewScan() {
   const [, setLocation] = useLocation();
   
   const [target, setTarget] = useState("");
-  const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "comprehensive">("http_smuggling");
+  const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "comprehensive">("http_smuggling");
   const [scope, setScope] = useState("");
 
   const createScan = trpc.scans.create.useMutation({
@@ -155,6 +155,19 @@ export default function NewScan() {
                     </div>
 
                     <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-accent transition-all">
+                      <RadioGroupItem value="xss" id="xss" />
+                      <Label htmlFor="xss" className="flex-1 cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <Activity className="w-5 h-5 text-accent" />
+                          <div>
+                            <p className="font-medium text-foreground">XSS Scanner</p>
+                            <p className="text-sm text-muted-foreground">Test for Cross-Site Scripting vulnerabilities (Reflected, DOM, Template Injection)</p>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-primary transition-all">
                       <RadioGroupItem value="comprehensive" id="comprehensive" />
                       <Label htmlFor="comprehensive" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-3">

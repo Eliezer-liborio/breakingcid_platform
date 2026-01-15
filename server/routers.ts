@@ -46,7 +46,7 @@ export const appRouter = router({
     // Create a new scan
     create: protectedProcedure
       .input(z.object({
-        scanType: z.enum(["http_smuggling", "ssrf", "comprehensive"]),
+        scanType: z.enum(["http_smuggling", "ssrf", "xss", "comprehensive"]),
         target: z.string().url(),
         scope: z.string().optional(),
       }))
@@ -160,21 +160,29 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
         timeout: 120000,
       });
       result = JSON.parse(stdout);
+    } else if (scanType === "xss") {
+      const { stdout } = await execAsync(`python3 ${modulesPath}/xss_scanner.py "${target}"`, {
+        timeout: 120000,
+      });
+      result = JSON.parse(stdout);
     } else if (scanType === "comprehensive") {
-      // Run both scans
-      const [smuggling, ssrf] = await Promise.all([
+      // Run all scans
+      const [smuggling, ssrf, xss] = await Promise.all([
         execAsync(`python3 ${modulesPath}/http_smuggling.py "${target}"`),
         execAsync(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`),
+        execAsync(`python3 ${modulesPath}/xss_scanner.py "${target}"`),
       ]);
       
       const smugglingResult = JSON.parse(smuggling.stdout);
       const ssrfResult = JSON.parse(ssrf.stdout);
+      const xssResult = JSON.parse(xss.stdout);
       
       result = {
         success: true,
         vulnerabilities: [
           ...smugglingResult.vulnerabilities,
           ...ssrfResult.vulnerabilities,
+          ...xssResult.vulnerabilities,
         ],
       };
     }
