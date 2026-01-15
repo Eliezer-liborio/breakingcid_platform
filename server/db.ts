@@ -1,11 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, scans, InsertScan, Scan, vulnerabilities, InsertVulnerability, Vulnerability, reports, InsertReport, Report } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -89,4 +88,81 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============ SCANS ============
+
+export async function createScan(scan: InsertScan): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(scans).values(scan);
+  return Number(result[0].insertId);
+}
+
+export async function getScanById(id: number): Promise<Scan | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(scans).where(eq(scans.id, id)).limit(1);
+  return result[0];
+}
+
+export async function getScansByUserId(userId: number): Promise<Scan[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(scans).where(eq(scans.userId, userId)).orderBy(desc(scans.createdAt));
+}
+
+export async function getAllScans(): Promise<Scan[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(scans).orderBy(desc(scans.createdAt));
+}
+
+export async function updateScanStatus(
+  id: number,
+  status: "pending" | "running" | "completed" | "failed",
+  completedAt?: Date,
+  duration?: number
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(scans).set({ status, completedAt, duration }).where(eq(scans.id, id));
+}
+
+// ============ VULNERABILITIES ============
+
+export async function createVulnerability(vuln: InsertVulnerability): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(vulnerabilities).values(vuln);
+  return Number(result[0].insertId);
+}
+
+export async function getVulnerabilitiesByScanId(scanId: number): Promise<Vulnerability[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(vulnerabilities).where(eq(vulnerabilities.scanId, scanId));
+}
+
+// ============ REPORTS ============
+
+export async function createReport(report: InsertReport): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(reports).values(report);
+  return Number(result[0].insertId);
+}
+
+export async function getReportByScanId(scanId: number): Promise<Report | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(reports).where(eq(reports.scanId, scanId)).limit(1);
+  return result[0];
+}
