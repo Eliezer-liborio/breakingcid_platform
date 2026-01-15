@@ -1,0 +1,1 @@
+ALTER TABLE `scans` MODIFY COLUMN `scanType` enum('http_smuggling','ssrf','xss','subdomain_enum','comprehensive') NOT NULL;

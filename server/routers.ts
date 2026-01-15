@@ -46,7 +46,7 @@ export const appRouter = router({
     // Create a new scan
     create: protectedProcedure
       .input(z.object({
-        scanType: z.enum(["http_smuggling", "ssrf", "xss", "comprehensive"]),
+        scanType: z.enum(["http_smuggling", "ssrf", "xss", "subdomain_enum", "comprehensive"]),
         target: z.string().url(),
         scope: z.string().optional(),
       }))
@@ -165,17 +165,24 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
         timeout: 120000,
       });
       result = JSON.parse(stdout);
+    } else if (scanType === "subdomain_enum") {
+      const { stdout } = await execAsync(`python3 ${modulesPath}/subdomain_enum.py "${target}"`, {
+        timeout: 180000, // 3 minutes for subdomain enumeration
+      });
+      result = JSON.parse(stdout);
     } else if (scanType === "comprehensive") {
       // Run all scans
-      const [smuggling, ssrf, xss] = await Promise.all([
+      const [smuggling, ssrf, xss, subdomain] = await Promise.all([
         execAsync(`python3 ${modulesPath}/http_smuggling.py "${target}"`),
         execAsync(`python3 ${modulesPath}/ssrf_scanner.py "${target}"`),
         execAsync(`python3 ${modulesPath}/xss_scanner.py "${target}"`),
+        execAsync(`python3 ${modulesPath}/subdomain_enum.py "${target}"`),
       ]);
       
       const smugglingResult = JSON.parse(smuggling.stdout);
       const ssrfResult = JSON.parse(ssrf.stdout);
       const xssResult = JSON.parse(xss.stdout);
+      const subdomainResult = JSON.parse(subdomain.stdout);
       
       result = {
         success: true,
@@ -183,6 +190,7 @@ async function executeScanAsync(scanId: number, scanType: string, target: string
           ...smugglingResult.vulnerabilities,
           ...ssrfResult.vulnerabilities,
           ...xssResult.vulnerabilities,
+          ...subdomainResult.vulnerabilities,
         ],
       };
     }

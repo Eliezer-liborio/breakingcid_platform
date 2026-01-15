@@ -17,7 +17,7 @@ export default function NewScan() {
   const [, setLocation] = useLocation();
   
   const [target, setTarget] = useState("");
-  const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "comprehensive">("http_smuggling");
+  const [scanType, setScanType] = useState<"http_smuggling" | "ssrf" | "xss" | "subdomain_enum" | "comprehensive">("http_smuggling");
   const [scope, setScope] = useState("");
 
   const createScan = trpc.scans.create.useMutation({
@@ -168,10 +168,23 @@ export default function NewScan() {
                     </div>
 
                     <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-primary transition-all">
+                      <RadioGroupItem value="subdomain_enum" id="subdomain_enum" />
+                      <Label htmlFor="subdomain_enum" className="flex-1 cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <Target className="w-5 h-5 text-primary" />
+                          <div>
+                            <p className="font-medium text-foreground">Subdomain Enumeration</p>
+                            <p className="text-sm text-muted-foreground">Discover subdomains via DNS, Certificate Transparency, and brute force</p>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:border-secondary transition-all">
                       <RadioGroupItem value="comprehensive" id="comprehensive" />
                       <Label htmlFor="comprehensive" className="flex-1 cursor-pointer">
                         <div className="flex items-center gap-3">
-                          <Activity className="w-5 h-5 text-accent" />
+                          <Activity className="w-5 h-5 text-secondary" />
                           <div>
                             <p className="font-medium text-foreground">Comprehensive Scan</p>
                             <p className="text-sm text-muted-foreground">Run all available security tests</p>

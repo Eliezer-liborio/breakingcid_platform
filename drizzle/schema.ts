@@ -24,7 +24,7 @@ export type InsertUser = typeof users.$inferInsert;
 export const scans = mysqlTable("scans", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  scanType: mysqlEnum("scanType", ["http_smuggling", "ssrf", "xss", "comprehensive"]).notNull(),
+  scanType: mysqlEnum("scanType", ["http_smuggling", "ssrf", "xss", "subdomain_enum", "comprehensive"]).notNull(),
   target: varchar("target", { length: 512 }).notNull(),
   scope: text("scope"),
   status: mysqlEnum("status", ["pending", "running", "completed", "failed"]).default("pending").notNull(),

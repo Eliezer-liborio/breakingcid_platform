@@ -55,3 +55,14 @@
 - [x] Adicionar tipo de scan "xss" no frontend
 - [x] Atualizar schema do banco de dados se necessário
 - [x] Testar execução de scans XSS
+
+## Implementação Subdomain Enumeration
+- [x] Criar módulo Python para enumeração de subdomínios
+- [x] Implementar descoberta via DNS (subfinder-like)
+- [x] Implementar descoberta via Certificate Transparency
+- [x] Implementar brute force de subdomínios
+- [x] Adicionar verificação de subdomínios ativos
+- [x] Integrar no backend (routers.ts)
+- [x] Adicionar tipo de scan "subdomain_enum" no frontend
+- [x] Atualizar schema do banco de dados
+- [x] Testar execução de enumeração
